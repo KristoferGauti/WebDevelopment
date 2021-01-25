@@ -1,0 +1,129 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto Mono', monospace;
+}
+
+header {
+    float: left;
+    background-color: #deebf7;
+    width: 22vw;
+    height: 840px; /* fix later, make it dynamic */
+    border-left: solid 6px #9ac8e0;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.link {
+    visibility: visible;
+    margin: 0.7em;
+    font-size: 1.56em;
+    color: #575c62;
+    text-decoration: none;
+    border-bottom: solid 3px #000000;
+}
+
+.hamburger-menu {
+    visibility: hidden;
+}
+
+main {
+    margin-top: 20px;
+    margin-left: 20vw;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+}
+
+main > div {
+    background-color: #deebf7;
+    width: 44.5%;
+    height: auto;
+    border-left: solid 6px #9ac8e0;
+    margin: 0 8px 30px;
+}
+
+.card-body {
+    display: flex;
+    justify-content: space-between;
+}
+
+.card-img {
+    width: 25%;
+    height: 25%;
+    margin: 20px 20px 10px;
+}
+
+.card-title {
+    float: right;
+    font-size: 1em;
+    text-align: center;
+    font-weight: 900;
+    width: 10.5em;
+    padding: 20px 20px 10px;
+}
+
+.undertitle {
+    font-weight: 900;
+    margin: 0 0 0 20px;
+}
+.text {
+    margin: 0 0 15px 20px;
+}
+
+@media only screen and (max-width: 650px) {
+    header {
+        position: relative;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 50px;
+    }
+    
+    .hamburger-menu {
+        visibility: visible;
+        position: absolute;
+        bottom: 0.5px;
+        font-size: 3.8em;
+        margin: 3px;
+        text-decoration: none;
+        color: #000000;
+    }
+
+    .link {
+        visibility: hidden;
+    }
+
+    main {
+        width: 100%;
+        margin: 0;
+    }
+
+    main > div {
+        height: auto;
+        margin: 20px;
+        flex: 1 100%;
+    }
+
+    .card-body {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .card-img {
+        width: 35%;
+    }
+
+    .undertitle {
+        text-align: center;
+        margin: 5px 0;
+    }
+
+    .text {
+        text-align: center;
+        margin: 0 0 10px;
+    }
+}
