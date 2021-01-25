@@ -7,21 +7,25 @@
         <meta name="Responsive web page" content="The first assignment in web programming">
         <meta name="keywords" content="HTML, responsive, flexbox, T-213-VEFF">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="authors" content="Kristofer Gauti Þórhallsson Bergur Tareq Tamimi">
+        <meta name="authors" content="Kristofer Gauti Þórhallsson & Bergur Tareq Tamimi">
         <link rel="preconnect" href="https://fonts.gstatic.com">
         <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
         <header>
-            <a class="link" href="index.html">Programs</a>
+            <!-- href="index.html" is to redirects to the same page at the original page -->
+            <!-- we use <a>(anchor tag) for the link functionality -->
+            <!-- we use &equiv; to create the hamburger menu logo -->
+            <a class="link" href="index.html">Programs</a>      
             <a class="link" href="index.html">Courses</a>
             <a class="link" href="index.html">Admission</a>
             <a class="link" href="index.html">Contact</a>
-            <a class="hamburger-menu" href="index.html">&equiv;</a>
+            <a id="hamburger-menu" href="index.html">&equiv;</a>
         </header>
         <main>
             <div>
+                <!-- we use the second div to aline the photo and title next to each other -->
                 <div class="card-body">
                     <img class="card-img" src="prj01_suppl/bulb.jpg" alt="Power Electronics">
                     <p class="card-title">Power Electronics</p>
