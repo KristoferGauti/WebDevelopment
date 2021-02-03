@@ -1,5 +1,35 @@
-button {
-    width: 100vw;
-    height: 100vh;
-    color: red;
+/* Reset the padding and margin settings    */
+* {
+    margin: 0;
+    padding: 0;
 }
+
+main {
+    height: 70vh;
+    display: flex;
+    flex-direction: row;
+    /* Makes the boxes jump to the next row according to width */
+    flex-wrap: wrap;
+}
+
+form {
+    height: 30vh;
+    margin-top: 75px;
+    margin-left: 35px;
+}
+
+#inputText{
+    margin: 5px;
+}
+
+.card{
+
+    height: 20vh;
+    width: 18%;
+    background-color: rgb(51, 51, 206);
+    margin: 30px;
+    padding: 20px;
+
+    
+}
+
