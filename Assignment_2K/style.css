@@ -1,5 +1,50 @@
-button {
-    width: 100vw;
-    height: 100vh;
-    color: red;
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#createTitle {
+    font-size: medium;
+    margin: 1.3em 1.3em 0.4em 1.3em;
+}
+#undertitle {
+    color: grey;
+    margin-left: 1.7em;
+    margin-top: 0.3em;
+    font-size: small;
+}
+
+#boardInput {
+    width: 20vw;
+    height: 2em;
+    margin-left: 0.7em;
+    padding: 3px;
+    border: solid 1px grey;
+    border-radius: 5px;
+}
+
+hr {
+    margin: 0.8em 1.3em;
+    background-color: grey;
+    height: 1px;
+}
+
+main {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.title {
+    font-size: xx-large;
+    font-weight: 150; 
+    margin: 0.3em;
+}
+
+.card {
+    width: 30%;
+    height: 30vh;
+    border: solid 1px grey;
+    border-radius: 5px;
+    margin: 0.3em;
 }

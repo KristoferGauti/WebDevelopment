@@ -7,9 +7,23 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="style.css">
+
     </head>
     <body>
-        <button id="kristofer">Hello world!</button>
+        <header>
+            <p id="createTitle">Create a new board</p>
+            <form class="theForm" action="boards.html" onsubmit="return insertCard();" autocomplete="off" method="GET">
+                <input type="text" id="boardInput" name="boardInput" placeholder="Create new board">
+            </form>
+            <p id=undertitle>Enter a board name and press the 'Enter' key.</p>
+            <hr/>
+        </header>
+        <main>
+            <!--index.js inserts the cards in the main tag -->
+        </main>
+
+
+
         
         <script src="index.js" async defer></script>
     </body>
