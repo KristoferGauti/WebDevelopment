@@ -9,24 +9,25 @@
     margin: 1.3em 1.3em 0.4em 1.3em;
 }
 #undertitle {
-    color: grey;
+    color: #727577;
     margin-left: 1.7em;
     margin-top: 0.3em;
     font-size: small;
 }
 
-#boardInput {
-    width: 20vw;
+.Input {
+    width: 25vw;
     height: 2em;
+    margin-top: 0.6em;
     margin-left: 0.7em;
     padding: 3px;
-    border: solid 1px grey;
+    border: solid 1px #727577;
     border-radius: 5px;
 }
 
 hr {
     margin: 0.8em 1.3em;
-    background-color: grey;
+    background-color: #727577;
     height: 1px;
 }
 
@@ -35,16 +36,23 @@ main {
     flex-flow: row wrap;
 }
 
+.Ex::before {
+    content: "✖️";
+    color: #727577;
+    font-size: 3em; 
+}
+
 .title {
     font-size: xx-large;
     font-weight: 150; 
-    margin: 0.3em;
+    color: #3f4346;
 }
 
 .card {
     width: 30%;
     height: 30vh;
-    border: solid 1px grey;
+    border: solid 1px #727577;
     border-radius: 5px;
     margin: 0.3em;
+    padding: 1.1em 0.8em 2em;
 }

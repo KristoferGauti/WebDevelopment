@@ -3,17 +3,18 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title></title>
+        <title>Client Side Javascript</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
         <link rel="stylesheet" href="style.css">
 
     </head>
-    <body>
+    <body onload="loadAllCards()">
         <header>
             <p id="createTitle">Create a new board</p>
-            <form class="theForm" action="boards.html" onsubmit="return insertCard();" autocomplete="off" method="GET">
-                <input type="text" id="boardInput" name="boardInput" placeholder="Create new board">
+            <form onsubmit="return createCard();" autocomplete="off" method="GET">
+                <input type="text" class="Input mainInput" name="boardInput" placeholder="Create new board">
             </form>
             <p id=undertitle>Enter a board name and press the 'Enter' key.</p>
             <hr/>
