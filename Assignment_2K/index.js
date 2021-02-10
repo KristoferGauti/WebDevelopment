@@ -30,7 +30,7 @@ function createCard() {
     let titleTag = document.createElement("p");
     let taskForm = document.createElement("form");
     let taskInput = document.createElement("input");
-    
+
     divTag.setAttribute("class", "card");
     deleteBtn.setAttribute("class", "Ex");
     titleTag.setAttribute("class", "title");
@@ -43,36 +43,30 @@ function createCard() {
     taskInput.style.marginLeft = "0"
     taskInput.setAttribute("placeholder","Create new task");
     titleTag.innerText = Inputs[0].value;
-
-
+    Inputs[0].value = "";
     divTag.appendChild(deleteBtn);
     divTag.appendChild(titleTag);
     divTag.appendChild(taskForm);
     taskForm.appendChild(taskInput);
     mainTag[0].appendChild(divTag);
 
-    executeEventListeners([Inputs[0], taskInput]);
+    executeEventListeners([Inputs[0], taskInput], divTag);
+
     //To prevent reloading the page
     return false;
 }
 
-function createTask(){
-    console.log("You just created a task")
-}
-
-function executeEventListeners(elementList) {
-    /**
-     * If user creates board and then creates a task and creates 
-     * a board again, everything will flop, fix this!
-     */
+function executeEventListeners(elementList, parentElement) {
     elementList.forEach((elem) => {
         elem.addEventListener("keypress", (event) => {
             if (event.key === "Enter") {
-                console.log("enter presssed");
                 if(elem.classList.contains("taskInput")) {
-                    createTask();
+                    taskDiv = document.createElement("div");
+                    taskDiv.setAttribute("class", "task");
+                    taskDiv.innerText = event.target.value;
+                    parentElement.appendChild(taskDiv);
+                    event.target.value = "";
                 }
-                elem.value = "";
             }
         });
     })
