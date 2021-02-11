@@ -10,10 +10,10 @@
         <link rel="stylesheet" href="style.css">
 
     </head>
-    <body onload="loadAllCards()">
+    <body onload="loadAllBoards()">
         <header>
             <p id="createTitle">Create a new board</p>
-            <form onsubmit="return createCard();" autocomplete="off" method="GET">
+            <form onsubmit="return createCard(this.children[0], false);" autocomplete="off" method="GET">
                 <input type="text" class="Input mainInput" name="boardInput" placeholder="Create new board">
             </form>
             <p id=undertitle>Enter a board name and press the 'Enter' key.</p>
