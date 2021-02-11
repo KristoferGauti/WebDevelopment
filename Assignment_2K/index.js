@@ -59,14 +59,20 @@ function createCard() {
 function executeEventListeners(elementList, parentElement) {
     elementList.forEach((elem) => {
         elem.addEventListener("keypress", (event) => {
-            if (event.key === "Enter") {
-                if(elem.classList.contains("taskInput")) {
-                    taskDiv = document.createElement("div");
-                    taskDiv.setAttribute("class", "task");
-                    taskDiv.innerText = event.target.value;
-                    parentElement.appendChild(taskDiv);
-                    event.target.value = "";
-                }
+            if (event.key === "Enter" && elem.classList.contains("taskInput")) {
+                let deleteBtn = document.createElement("div");
+                let taskDiv = document.createElement("div");
+                let taskParagraph = document.createElement("p");
+
+                taskDiv.setAttribute("class", "task");
+                deleteBtn.setAttribute("class", "Ex");
+                taskParagraph.innerText = event.target.value;
+                taskParagraph.style = "width: 80%;";
+                
+                taskDiv.appendChild(taskParagraph);
+                taskDiv.appendChild(deleteBtn);
+                parentElement.appendChild(taskDiv);
+                event.target.value = "";
             }
         });
     })
