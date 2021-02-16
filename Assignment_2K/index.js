@@ -1,30 +1,32 @@
 let mainTag = document.getElementsByTagName("main");
 let Inputs = document.getElementsByClassName("Input");
+let boardIdList = [];
 
 function loadAllBoards(){
-    let boardUrl = "https://veff-boards-h1.herokuapp.com/api/v1/boards";
-    let boardIdList = [];
+    let boardUrl = "https://veff-boards-h3.herokuapp.com/api/v1/boards";
+    
 
     axios.get(boardUrl)
     .then((response) => {
+        console.log(response)
         for (board of response.data) {
             boardIdList.push(board.id);
             createCard(board, true);
-            
-            let taskUrl = `https://veff-boards-h1.herokuapp.com/api/v1/boards/${board.id}/tasks`;
-            axios.get(taskUrl)
-            .then((response) => {
-                console.log(response);
-                let divTag = document.getElementsByClassName("card")[0];
-                for (task of response.data) {
-                    console.log(task.id, board.id);
-                    _createTask(task, divTag, true);
-                }
-            }).catch((error) => {console.log("ERROR! from getting the tasks.", error)});
         }
+        getTasks(response);
     }).catch((error) => {console.log("ERROR! from getting the boards.", error)});
+}
 
-    
+function getTasks(boardResponse) {
+    let taskUrl = `https://veff-boards-h3.herokuapp.com/api/v1/boards/${board.id}/tasks`;
+    axios.get(taskUrl)
+    .then((response) => {
+        console.log(response, "\n\n");
+        let divTag = document.getElementsByClassName("card")[0];
+        for (task of response.data) {
+            createTask(task, divTag, boardResponse, response);
+        }
+    }).catch((error) => {console.log("ERROR! from getting the tasks.", error)});
 }
 
 function createCard(inputElem, fromBackend) {
@@ -35,6 +37,7 @@ function createCard(inputElem, fromBackend) {
     let taskInput = document.createElement("input");
 
     divTag.setAttribute("class", "card");
+    divTag.setAttribute("id", `${boardIdList[boardIdList.length - 1]}`)
     deleteBtn.setAttribute("class", "Ex");
     titleTag.setAttribute("class", "title");
     taskForm.setAttribute("onsubmit", "return false;");
@@ -61,28 +64,40 @@ function createCard(inputElem, fromBackend) {
     return false;
 }
 
-function _createTask(task, parentElement, fromBackend) {
+function createTask(task, parentElement, boardResponse, taskResponse) {
     let deleteBtn = document.createElement("div");
     let taskDiv = document.createElement("div");
     let taskParagraph = document.createElement("p");
 
     taskDiv.setAttribute("class", "task");
     deleteBtn.setAttribute("class", "Ex");
-    if (fromBackend) taskParagraph.innerText = task.taskName;
-    else taskParagraph.innerText = task.value;
+
     taskParagraph.style = "width: 80%;";
-    
     taskDiv.appendChild(taskParagraph);
     taskDiv.appendChild(deleteBtn);
-    parentElement.appendChild(taskDiv);
-    event.target.value = "";
+    if (!boardResponse) {
+        taskParagraph.innerText = task.value;
+        parentElement.appendChild(taskDiv);
+        event.target.value = "";
+    }
+    else {
+        let mainTag = document.getElementsByTagName("main")[0];
+        mainTag.childNodes.forEach((board) => {
+            if (board.id == task.id) {
+                taskParagraph.innerText = task.taskName;
+                board.appendChild(taskDiv);
+                event.target.value = "";
+            }
+        });
+    }
+    
 }
 
 function executeEventListener(elementList, parentElement) {
     elementList.forEach((elem) => {
         elem.addEventListener("keypress", (event) => {
             if (event.key === "Enter" && elem.classList.contains("taskInput")) {
-                _createTask(event.target, parentElement, false);
+                createTask(event.target, parentElement, null);
             }
         });
     })
