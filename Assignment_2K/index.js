@@ -17,7 +17,7 @@ function getTasks(boardId) {
     let taskUrl = `${URL}${boardId}/tasks`;
     axios.get(taskUrl)
     .then((response) => {
-        //console.log(response, "\n\n");
+        console.log(response, "\n\n");
         for (task of response.data) {
             createTask(task, true);
         }
@@ -36,7 +36,6 @@ function postBoard(boardName) {
 }
 
 function postTask(boardId, name) {
-    console.log(boardId, name);
     axios.post(`${URL}${boardId}/tasks`,
         {
             taskName: name
@@ -44,6 +43,19 @@ function postTask(boardId, name) {
     ).then((response) => {
         //console.log(response);
     }).catch((error) => {console.log("ERROR! from posting tasks.", error)})
+}
+
+function deleteBoard(board) {
+    board.style.visibility = "hidden";
+    //console.log(board);
+
+    axios.delete(`${URL}${board.id}`,
+        {
+
+        }
+    ).then((response) => {
+        console.log(response);
+    }).catch((error) => {console.log("ERROR! from posting tasks.", error)});
 }
 
 function createCard(inputElem, fromBackend) {
@@ -100,7 +112,6 @@ function createTask(task, loadFromBacked) {
         let mainTag = document.getElementsByTagName("main")[0];
         mainTag.childNodes.forEach((board) => {
             if (board.id == task.boardId) {
-                //console.dir(board);
                 taskParagraph.innerText = task.taskName;
                 board.appendChild(taskDiv);
                 event.target.value = "";
@@ -117,12 +128,25 @@ function createTask(task, loadFromBacked) {
 }
 
 function executeEventListener(elementList) {
+    let deleteBtn = document.getElementsByClassName("Ex");
+    let boardItemCounter = 0;
     elementList.forEach((elem) => {
         elem.addEventListener("keypress", (event) => {
             if (event.key === "Enter" && elem.classList.contains("taskInput")) {
                 createTask(event.target, false);
             }
         });
-    })
+    });
+    
+    Array.prototype.slice.call(deleteBtn).forEach((button) => {
+        divTask = document.createElement("div").setAttribute("class","task");
+        button.addEventListener("click", (event) => {
+            boardItemCounter += 1;
+            if (boardItemCounter == 1) {
+                deleteBoard(event.target.parentElement);
+            }
+        });
+    });
+    
 }
 
