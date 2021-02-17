@@ -1,32 +1,35 @@
-// form becomes a html element that can be appended a event listener
+// The input, to create the board
 let boardForm = document.getElementById("createBoard");
-
-
-boardForm.addEventListener("submit", (event) =>{ 
-
-    // event.target is the one who commited the event
-    // evemt.target -> form[upper text, input,lower text]
-    createBoard(event.target.children[1].value);
-
-    // prevents the page from reloading
-    event.preventDefault();
-    
-});
-
-
-                                
-// The box that holds all of the cards
-// by getting elemts by id we have them as objects(not as a list)
-
-// boardBox is the frame that will contain each board(in main)
+// The frame that will contain each board(in main)
 let boardBox = document.getElementById("boardFrame");
 
+boardForm.addEventListener("submit", (event) =>{ 
+    // evemt.target -> form[upper text, input,lower text]
+    createBoard(event.target.children[1].value, false);
+    event.preventDefault();  
+});
+
+// Getting the boards via tasks
+axios.get("https://veff-boards-h5.herokuapp.com/api/v1/boards")
+    .then(response => {
+        
+        for (board of response.data){
+            createBoard(board, true);
+            getTask(board.id);
+    }
+    })
+    .catch(error => {
+        console.log(error);
+    })
+
+// ******************  FUNCTIONS  ****************** //
 
 
-function createBoard(inputText) {
+function createBoard(boardObject, isFromDatabase) {
     // board element
     let board = document.createElement("div");
     board.setAttribute("class","board");
+    board.setAttribute("id",boardObject.id);
 
     // Delete button
     let deleteButton = document.createElement("div");
@@ -34,25 +37,21 @@ function createBoard(inputText) {
     
     deleteButton.addEventListener("submit", (event) =>{ 
 
-        //console.log(event.target);
-
-        //boardBox.remove(event);
-
     });
 
     board.append(deleteButton);
 
     // <p> inputText </p>
     let boardText = document.createElement("p");
-    boardText.innerHTML = inputText;
+
+    if (isFromDatabase) boardText.innerHTML = boardObject.name;
+    else boardText.innerHTML = boardObject;
 
     board.append(boardText);
-
 
     // <form> id="createTask"> </form>
     let taskInput = document.createElement("form"); // create element of type input
     taskInput.setAttribute("id","taskForm");
-
 
     // <input id="inputText" placeholder="Create a task" type="text"> </input>
     let theInput = document.createElement("input");
@@ -65,46 +64,59 @@ function createBoard(inputText) {
     //</form>
     taskInput.append(theInput);
 
-
     taskInput.addEventListener("submit", (event) =>{ 
-
-        board.append(createTask(event.target.children[0].value));
-
-        event.preventDefault();
+        let task = createTask(event.target.children[0],false,null)
+        board.append(task);
     });
 
-    
-
-
     board.append(taskInput);
-
-    // Add the card to the card box
     boardBox.append(board);
-
 }
 
 
 
-function createTask(nameOfTask){
+function createTask(taskObject, isFromDatabase, boardId){
     let taskFrame = document.createElement("div");
-    taskFrame.setAttribute("id","taskFrame");
+    taskFrame.setAttribute("class","taskFrame");
+
+    let deleteButton = document.createElement("div");
+    deleteButton.setAttribute("class","deleteButton");
+
     
 
     let taskText = document.createElement("p");
     taskText.setAttribute("class","task");
-    taskText.innerHTML = nameOfTask;
 
-    taskFrame.appendChild(taskText);
-
-    return taskFrame;
-
-}
-
-
+    // FROM CLIENT
+    if (!isFromDatabase){ 
+        taskText.innerHTML = taskObject.value;
+        taskFrame.appendChild(taskText);
+        taskFrame.append(deleteButton);
+        return taskFrame;  
+    }
+    // FROM DATABASE
+    else{
+        let boardList = document.getElementById("boardFrame").childNodes;
+        for (var i=0; i< boardList.length; i++){
+            if (boardList[i].id == boardId) {
+                taskText.innerHTML = taskObject.taskName;
+                taskFrame.appendChild(taskText);
+                boardList[i].append(taskFrame);
+                taskFrame.append(deleteButton);
+                return null;
+            }
+        } 
+    }
+    }
     
-
-
-
-
-
-
+function getTask(boardId){
+    axios.get("https://veff-boards-h5.herokuapp.com/api/v1/boards/" + boardId + "/tasks")
+    .then(response => {
+        for (task of response.data){
+            createTask(task,true,boardId);
+        }
+    })
+    .catch(error => {
+        console.log(error);
+    })
+}
