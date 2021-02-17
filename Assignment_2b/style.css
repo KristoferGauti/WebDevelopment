@@ -5,11 +5,19 @@
 }
 
 main {
-    height: 70vh;
+    height: 80vh;
     display: flex;
     flex-direction: row;
     /* Makes the boxes jump to the next row according to width */
     flex-wrap: wrap;
+}
+
+#boardFrame{
+    border-top: solid black;
+    border-width: 2px;
+    padding: auto;
+
+
 }
 
 form {
@@ -23,13 +31,13 @@ form {
 }
 
 .board{
-    height: fit-content;
-    width: 18%;
-    background-color: rgb(231, 229, 229);
+    height: fit-content; /* So that the board scales with the amount of tasks */
+    width: 23%;
     margin: 30px;
     padding: 20px;
     display: flex;
     flex-direction: column;
+    border: solid black;
 
 
 }
@@ -45,14 +53,25 @@ form {
     margin: 0;
     padding: 0;
     height: auto;
+    width:10vw;
 
 }
 
 
-#taskFrame{
-    background-color: red;
+.taskFrame{
+    background-color:#fff3cd;
     margin: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
 }
+
+p{
+    height: 30px;
+}
+
+
 
 
 

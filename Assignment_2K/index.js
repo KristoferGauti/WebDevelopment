@@ -1,24 +1,28 @@
+<<<<<<< HEAD
 let URL = "https://veff-boards-h2.herokuapp.com/api/v1/boards/";
+=======
+let URL = "https://veff-boards-h1.herokuapp.com/api/v1/boards/";
+>>>>>>> fe9c483d034c43f33c853f2b666e0d6a3d35aced
 let mainTag = document.getElementsByTagName("main");
 let Inputs = document.getElementsByClassName("Input");
-let runOnce = false;
 
 function loadAllBoards(){
     axios.get(URL)
     .then((response) => {
+        //console.log(response)
         for (board of response.data) {
-            createCard(board, true, board);
+            createCard(board, true);
             getTasks(board.id);
         }
-
     }).catch((error) => {console.log("ERROR! from getting the boards.", error)});
 }
 
 function getTasks(boardId) {
     axios.get(`${URL}${boardId}/tasks`)
     .then((response) => {
+        //console.log(response, "\n\n");
         for (task of response.data) {
-            createTask(task, true, board);
+            createTask(task, true);
         }
     }).catch((error) => {console.log("ERROR! from getting the tasks.", error)});
 }
@@ -46,18 +50,20 @@ function postTask(boardId, taskValue, taskDiv) {
 }
 
 function deleteBoard(board) {
-    board.remove();
+    board.style.display = "none";
     axios.delete(`${URL}${board.id}`,
         {}
     ).then((response) => {
+        //console.log(response);
     }).catch((error) => {console.log("ERROR! from posting tasks.", error)});
 }
 
 function deleteTask(task, boardId, taskId) {
-    task.remove();
+    task.style.display = "none";
     axios.delete(`${URL}${boardId}/tasks/${taskId}`,
         {}
     ).then((response) => {
+        //console.log(response);
     }).catch((error) => {console.log("ERROR! from deleting task", error)});
 }
 
@@ -115,22 +121,13 @@ function createCard(inputElem, fromBackend) {
     taskForm.appendChild(taskInput);
     mainTag[0].appendChild(divTag);
 
-    divTag.addEventListener("dragover", (event) =>{
-        event.preventDefault();
-        const afterElement = getDragAfterElement(event.target, event.clientY);
-        const draggable = document.querySelector(".dragging");
-        if (afterElement == null) divTag.append(draggable);
-        else divTag.insertBefore(draggable, afterElement);
-    });
-
-    //console.log(divTag); //here 1
-    executeEventListener([Inputs[0], taskInput], inputElem);
+    executeEventListener([Inputs[0], taskInput]);
 
     //To prevent reloading the page
     return false;
 }
 
-function createTask(task, loadFromBacked, board) {
+function createTask(task, loadFromBacked) {
     let deleteBtn = document.createElement("div");
     let taskDiv = document.createElement("div");
     let taskParagraph = document.createElement("p");
@@ -155,9 +152,7 @@ function createTask(task, loadFromBacked, board) {
         deleteTask(event.target.parentElement, boardId, taskId);
     });
 
-
     taskDiv.setAttribute("class", "task");
-    taskDiv.setAttribute("draggable", "true");
     deleteBtn.setAttribute("class", "Ex");
 
     taskParagraph.style = "width: 80%;";
@@ -165,9 +160,9 @@ function createTask(task, loadFromBacked, board) {
     taskDiv.appendChild(deleteBtn);
 
     
-    let mainTag = document.getElementsByTagName("main")[0];
     if (loadFromBacked){
         taskDiv.setAttribute("id", `${task.id}`);
+        let mainTag = document.getElementsByTagName("main")[0];
         mainTag.childNodes.forEach((board) => {
             if (board.id == task.boardId) {
                 taskParagraph.innerText = task.taskName;
@@ -185,13 +180,13 @@ function createTask(task, loadFromBacked, board) {
     }  
 }
 
-function executeEventListener(elementList, board) {
+function executeEventListener(elementList) {
     let deleteBtn = document.getElementsByClassName("Ex");
-    
+
     elementList.forEach((elem) => {
         elem.addEventListener("keypress", (event) => {
             if (event.key === "Enter" && elem.classList.contains("taskInput")) {
-                createTask(event.target, false, board);
+                createTask(event.target, false);
             }
         });
     });
