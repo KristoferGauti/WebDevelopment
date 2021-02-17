@@ -5,7 +5,7 @@ let Inputs = document.getElementsByClassName("Input");
 function loadAllBoards(){
     axios.get(URL)
     .then((response) => {
-        console.log(response)
+        //console.log(response)
         for (board of response.data) {
             createCard(board, true);
             getTasks(board.id);
@@ -35,31 +35,33 @@ function postBoard(boardName, boardTag) {
     }).catch((error) => {console.log("ERROR! from posting boards.", error)})
 }
 
-function postTask(boardId, name) {
+function postTask(boardId, taskValue, taskDiv) {
     axios.post(`${URL}${boardId}/tasks`,
         {
-            taskName: name
+            taskName: taskValue
         }
     ).then((response) => {
-        //console.log(response);
+        console.log(response.data.id);
+        taskDiv.setAttribute("id", `${response.data.id}`);
     }).catch((error) => {console.log("ERROR! from posting tasks.", error)})
 }
 
 function deleteBoard(board) {
-    board.style.visibility = "hidden";
-    //console.log(board);
-
+    board.style.display = "none";
     axios.delete(`${URL}${board.id}`,
-        {
-
-        }
+        {}
     ).then((response) => {
         //console.log(response);
     }).catch((error) => {console.log("ERROR! from posting tasks.", error)});
 }
 
-function deleteTask(task) {
-    console.log(task);
+function deleteTask(task, boardId, taskId) {
+    task.style.display = "none";
+    axios.delete(`${URL}${boardId}/tasks/${taskId}`,
+        {}
+    ).then((response) => {
+        //console.log(response);
+    }).catch((error) => {console.log("ERROR! from deleting task", error)});
 }
 
 function createCard(inputElem, fromBackend) {
@@ -107,8 +109,11 @@ function createTask(task, loadFromBacked) {
     let taskDiv = document.createElement("div");
     let taskParagraph = document.createElement("p");
 
+
     deleteBtn.addEventListener("click", (event) => {
-        deleteTask(event.target.parentElement);
+        let boardId = event.target.parentElement.parentElement.id;
+        let taskId = event.target.parentElement.id;
+        deleteTask(event.target.parentElement, boardId, taskId);
     });
 
     taskDiv.setAttribute("class", "task");
@@ -119,6 +124,7 @@ function createTask(task, loadFromBacked) {
     taskDiv.appendChild(deleteBtn);
 
     if (loadFromBacked){
+        taskDiv.setAttribute("id", `${task.id}`);
         let mainTag = document.getElementsByTagName("main")[0];
         mainTag.childNodes.forEach((board) => {
             if (board.id == task.boardId) {
@@ -130,7 +136,7 @@ function createTask(task, loadFromBacked) {
     }
     else {
         let board = task.parentNode.parentNode;
-        postTask(board.id, task.value);
+        postTask(board.id, task.value, taskDiv);
         taskParagraph.innerText = task.value;
         board.appendChild(taskDiv);
         event.target.value = "";
