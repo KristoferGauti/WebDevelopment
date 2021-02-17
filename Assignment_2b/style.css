@@ -16,7 +16,7 @@ main {
     border-top: solid black;
     border-width: 2px;
     padding: auto;
-
+    font-size: 40px;
 
 }
 
@@ -24,10 +24,13 @@ form {
     height: 10vh;
     margin-top: 75px;
     margin-left: 35px;
+    font-size: 18px;
+    margin-bottom: 20px;
 }
 
 #inputText{
-    margin: 5px;
+    height: 20px;
+    padding: 5px;
 }
 
 .board{
@@ -37,22 +40,21 @@ form {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    border: solid black;
-
+    border: 2px solid black;
+    border-radius: 20px;
+    align-items:stretch;
 
 }
 
-.cardInput{
-    height: 15px;
+#taskInput{
+    height: 3vw;
     margin: 20px;
-
-
+    width: 20vw;
 }
 
 #taskForm{
     margin: 0;
     padding: 0;
-    height: auto;
     width:10vw;
 
 }
@@ -64,17 +66,22 @@ form {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-
+    height: fit-content; /* not working */
+    padding: 10px;
+    border-radius: 10px;
 }
 
 p{
     height: 30px;
+    font-size: 25px;
 }
 
+.deleteButton{
 
-
-
-
+    height: 20px;
+    width: 20px;
+    
+}
 
 .deleteButton::before{
     content: "✕";
