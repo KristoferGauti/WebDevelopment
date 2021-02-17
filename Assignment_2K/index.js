@@ -1,4 +1,4 @@
-let URL = "https://veff-boards-h5.herokuapp.com/api/v1/boards/";
+let URL = "https://veff-boards-h2.herokuapp.com/api/v1/boards/";
 let mainTag = document.getElementsByTagName("main");
 let Inputs = document.getElementsByClassName("Input");
 let runOnce = false;
@@ -15,8 +15,7 @@ function loadAllBoards(){
 }
 
 function getTasks(boardId) {
-    let taskUrl = `${URL}${boardId}/tasks`;
-    axios.get(taskUrl)
+    axios.get(`${URL}${boardId}/tasks`)
     .then((response) => {
         for (task of response.data) {
             createTask(task, true, board);
@@ -25,7 +24,7 @@ function getTasks(boardId) {
 }
 
 function postBoard(boardName, boardTag) {
-    axios.post(`${URL}`,
+    axios.post(URL,
         {
             name: boardName,
             description: ""
@@ -60,6 +59,16 @@ function deleteTask(task, boardId, taskId) {
         {}
     ).then((response) => {
     }).catch((error) => {console.log("ERROR! from deleting task", error)});
+}
+
+function patchTask(fromBoardId, draggableTaskId, toBoardId) {
+    axios.patch(`${URL}${fromBoardId}/tasks/${draggableTaskId}`,
+        {
+            boardId: toBoardId
+        }
+    ).then((response) => {
+        console.log(response);
+    }).catch((error) => {console.log("ERROR! from patching draggable task", error)});
 }
 
 function getDragAfterElement(container, y) {
@@ -126,13 +135,16 @@ function createTask(task, loadFromBacked, board) {
     let taskDiv = document.createElement("div");
     let taskParagraph = document.createElement("p");
 
-
+    let fromboardId;
     taskDiv.addEventListener("dragstart", (event) => {
         taskDiv.classList.add("dragging");
-        //setTimeout(() => {event.target.className = "invisible"}, 0);
+        fromboardId = event.target.parentElement.id;
     });
     taskDiv.addEventListener("dragend", (event) => {
         taskDiv.classList.remove("dragging");
+        let toBoardId = taskDiv.parentElement.id;
+        let taskId = taskDiv.id;
+        patchTask(fromboardId, taskId, toBoardId);
     });
 
     //console.log(taskDiv); //here 2
@@ -154,7 +166,6 @@ function createTask(task, loadFromBacked, board) {
 
     
     let mainTag = document.getElementsByTagName("main")[0];
-    //dragAndDrop(mainTag.childNodes, taskDiv);
     if (loadFromBacked){
         taskDiv.setAttribute("id", `${task.id}`);
         mainTag.childNodes.forEach((board) => {
