@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 let URL = "https://veff-boards-h2.herokuapp.com/api/v1/boards/";
-=======
-let URL = "https://veff-boards-h1.herokuapp.com/api/v1/boards/";
->>>>>>> fe9c483d034c43f33c853f2b666e0d6a3d35aced
 let mainTag = document.getElementsByTagName("main");
 let Inputs = document.getElementsByClassName("Input");
 
