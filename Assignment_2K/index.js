@@ -1,11 +1,11 @@
-let URL = "https://veff-boards-h2.herokuapp.com/api/v1/boards/";
+let URL = "https://veff-boards-h1.herokuapp.com/api/v1/boards/";
 let mainTag = document.getElementsByTagName("main");
 let Inputs = document.getElementsByClassName("Input");
 
 function loadAllBoards(){
     axios.get(URL)
     .then((response) => {
-        //console.log(response)
+        console.log(response)
         for (board of response.data) {
             createCard(board, true);
             getTasks(board.id);
@@ -17,21 +17,21 @@ function getTasks(boardId) {
     let taskUrl = `${URL}${boardId}/tasks`;
     axios.get(taskUrl)
     .then((response) => {
-        console.log(response, "\n\n");
+        //console.log(response, "\n\n");
         for (task of response.data) {
             createTask(task, true);
         }
     }).catch((error) => {console.log("ERROR! from getting the tasks.", error)});
 }
 
-function postBoard(boardName) {
+function postBoard(boardName, boardTag) {
     axios.post(`${URL}`,
         {
             name: boardName,
             description: ""
         }
     ).then((response) => {
-        //console.log(response);
+        boardTag.setAttribute("id", `${response.data.id}`);
     }).catch((error) => {console.log("ERROR! from posting boards.", error)})
 }
 
@@ -54,8 +54,12 @@ function deleteBoard(board) {
 
         }
     ).then((response) => {
-        console.log(response);
+        //console.log(response);
     }).catch((error) => {console.log("ERROR! from posting tasks.", error)});
+}
+
+function deleteTask(task) {
+    console.log(task);
 }
 
 function createCard(inputElem, fromBackend) {
@@ -66,7 +70,6 @@ function createCard(inputElem, fromBackend) {
     let taskInput = document.createElement("input");
 
     divTag.setAttribute("class", "card");
-    divTag.setAttribute("id", `${board.id}`)
     deleteBtn.setAttribute("class", "Ex");
     titleTag.setAttribute("class", "title");
     taskForm.setAttribute("onsubmit", "return false;");
@@ -77,9 +80,12 @@ function createCard(inputElem, fromBackend) {
     taskInput.setAttribute("name","taskInput");
     taskInput.style.marginLeft = "0"
     taskInput.setAttribute("placeholder","Create new task");
-    if (fromBackend) titleTag.innerText = inputElem.name;
+    if (fromBackend) {
+        divTag.setAttribute("id", `${inputElem.id}`) //where inputElem is the board
+        titleTag.innerText = inputElem.name
+    }
     else {
-        postBoard(inputElem.value);
+        postBoard(inputElem.value, divTag); // where inputElem is the board div element
         titleTag.innerText = inputElem.value;
     }
     Inputs[0].value = "";
@@ -100,6 +106,10 @@ function createTask(task, loadFromBacked) {
     let deleteBtn = document.createElement("div");
     let taskDiv = document.createElement("div");
     let taskParagraph = document.createElement("p");
+
+    deleteBtn.addEventListener("click", (event) => {
+        deleteTask(event.target.parentElement);
+    });
 
     taskDiv.setAttribute("class", "task");
     deleteBtn.setAttribute("class", "Ex");
@@ -129,7 +139,7 @@ function createTask(task, loadFromBacked) {
 
 function executeEventListener(elementList) {
     let deleteBtn = document.getElementsByClassName("Ex");
-    let boardItemCounter = 0;
+
     elementList.forEach((elem) => {
         elem.addEventListener("keypress", (event) => {
             if (event.key === "Enter" && elem.classList.contains("taskInput")) {
@@ -139,14 +149,11 @@ function executeEventListener(elementList) {
     });
     
     Array.prototype.slice.call(deleteBtn).forEach((button) => {
-        divTask = document.createElement("div").setAttribute("class","task");
         button.addEventListener("click", (event) => {
-            boardItemCounter += 1;
-            if (boardItemCounter == 1) {
-                deleteBoard(event.target.parentElement);
-            }
+            let board = event.target.parentElement;
+            if (!board.innerHTML.includes("class=\"task\"")) deleteBoard(board);
         });
     });
-    
+
 }
 
