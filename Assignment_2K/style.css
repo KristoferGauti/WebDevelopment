@@ -40,6 +40,7 @@ main {
     content: "✕";
     color: #727577;
     font-size: 1.5em; 
+    cursor: pointer;
 }
 
 .title {
@@ -58,6 +59,7 @@ main {
 }
 
 .task {
+    /*position: relative;*/
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -69,4 +71,12 @@ main {
     color: #6f570e;
     height: auto;
     border-radius: 5px;
+}
+
+.dragging {
+    opacity: 0.5;
+}
+
+.invisible {
+    display: none;
 }

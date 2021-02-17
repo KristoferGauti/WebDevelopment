@@ -1,15 +1,16 @@
-let URL = "https://veff-boards-h1.herokuapp.com/api/v1/boards/";
+let URL = "https://veff-boards-h5.herokuapp.com/api/v1/boards/";
 let mainTag = document.getElementsByTagName("main");
 let Inputs = document.getElementsByClassName("Input");
+let runOnce = false;
 
 function loadAllBoards(){
     axios.get(URL)
     .then((response) => {
-        //console.log(response)
         for (board of response.data) {
-            createCard(board, true);
+            createCard(board, true, board);
             getTasks(board.id);
         }
+
     }).catch((error) => {console.log("ERROR! from getting the boards.", error)});
 }
 
@@ -17,9 +18,8 @@ function getTasks(boardId) {
     let taskUrl = `${URL}${boardId}/tasks`;
     axios.get(taskUrl)
     .then((response) => {
-        //console.log(response, "\n\n");
         for (task of response.data) {
-            createTask(task, true);
+            createTask(task, true, board);
         }
     }).catch((error) => {console.log("ERROR! from getting the tasks.", error)});
 }
@@ -47,21 +47,29 @@ function postTask(boardId, taskValue, taskDiv) {
 }
 
 function deleteBoard(board) {
-    board.style.display = "none";
+    board.remove();
     axios.delete(`${URL}${board.id}`,
         {}
     ).then((response) => {
-        //console.log(response);
     }).catch((error) => {console.log("ERROR! from posting tasks.", error)});
 }
 
 function deleteTask(task, boardId, taskId) {
-    task.style.display = "none";
+    task.remove();
     axios.delete(`${URL}${boardId}/tasks/${taskId}`,
         {}
     ).then((response) => {
-        //console.log(response);
     }).catch((error) => {console.log("ERROR! from deleting task", error)});
+}
+
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll(".task:not(.dragging)")];
+    return draggableElements.reduce((closestElem, childElem) => {
+        const box = childElem.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closestElem.offset) return {offset: offset, element: childElem};
+        else return closestElem;
+    }, {offset: Number.NEGATIVE_INFINITY }).element;
 }
 
 function createCard(inputElem, fromBackend) {
@@ -98,17 +106,36 @@ function createCard(inputElem, fromBackend) {
     taskForm.appendChild(taskInput);
     mainTag[0].appendChild(divTag);
 
-    executeEventListener([Inputs[0], taskInput]);
+    divTag.addEventListener("dragover", (event) =>{
+        event.preventDefault();
+        const afterElement = getDragAfterElement(event.target, event.clientY);
+        const draggable = document.querySelector(".dragging");
+        if (afterElement == null) divTag.append(draggable);
+        else divTag.insertBefore(draggable, afterElement);
+    });
+
+    //console.log(divTag); //here 1
+    executeEventListener([Inputs[0], taskInput], inputElem);
 
     //To prevent reloading the page
     return false;
 }
 
-function createTask(task, loadFromBacked) {
+function createTask(task, loadFromBacked, board) {
     let deleteBtn = document.createElement("div");
     let taskDiv = document.createElement("div");
     let taskParagraph = document.createElement("p");
 
+
+    taskDiv.addEventListener("dragstart", (event) => {
+        taskDiv.classList.add("dragging");
+        //setTimeout(() => {event.target.className = "invisible"}, 0);
+    });
+    taskDiv.addEventListener("dragend", (event) => {
+        taskDiv.classList.remove("dragging");
+    });
+
+    //console.log(taskDiv); //here 2
 
     deleteBtn.addEventListener("click", (event) => {
         let boardId = event.target.parentElement.parentElement.id;
@@ -116,16 +143,20 @@ function createTask(task, loadFromBacked) {
         deleteTask(event.target.parentElement, boardId, taskId);
     });
 
+
     taskDiv.setAttribute("class", "task");
+    taskDiv.setAttribute("draggable", "true");
     deleteBtn.setAttribute("class", "Ex");
 
     taskParagraph.style = "width: 80%;";
     taskDiv.appendChild(taskParagraph);
     taskDiv.appendChild(deleteBtn);
 
+    
+    let mainTag = document.getElementsByTagName("main")[0];
+    //dragAndDrop(mainTag.childNodes, taskDiv);
     if (loadFromBacked){
         taskDiv.setAttribute("id", `${task.id}`);
-        let mainTag = document.getElementsByTagName("main")[0];
         mainTag.childNodes.forEach((board) => {
             if (board.id == task.boardId) {
                 taskParagraph.innerText = task.taskName;
@@ -143,13 +174,13 @@ function createTask(task, loadFromBacked) {
     }  
 }
 
-function executeEventListener(elementList) {
+function executeEventListener(elementList, board) {
     let deleteBtn = document.getElementsByClassName("Ex");
-
+    
     elementList.forEach((elem) => {
         elem.addEventListener("keypress", (event) => {
             if (event.key === "Enter" && elem.classList.contains("taskInput")) {
-                createTask(event.target, false);
+                createTask(event.target, false, board);
             }
         });
     });
@@ -160,6 +191,5 @@ function executeEventListener(elementList) {
             if (!board.innerHTML.includes("class=\"task\"")) deleteBoard(board);
         });
     });
-
 }
 
