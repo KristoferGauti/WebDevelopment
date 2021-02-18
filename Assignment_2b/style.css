@@ -1,25 +1,15 @@
-/* Reset the padding and margin settings    */
+/* Reset the padding and margin settings */
 * {
     margin: 0;
     padding: 0;
 }
-
 main {
     height: 80vh;
     display: flex;
     flex-direction: row;
-    /* Makes the boxes jump to the next row according to width */
+    /* Makes the boxes jump to the next row with respect to width */
     flex-wrap: wrap;
 }
-
-#boardFrame{
-    border-top: solid black;
-    border-width: 2px;
-    padding: auto;
-    font-size: 40px;
-
-}
-
 form {
     height: 10vh;
     margin-top: 75px;
@@ -27,12 +17,10 @@ form {
     font-size: 18px;
     margin-bottom: 20px;
 }
-
-#inputText{
+.inputText{
     height: 20px;
     padding: 5px;
 }
-
 .board{
     height: fit-content; /* So that the board scales with the amount of tasks */
     width: 23%;
@@ -43,47 +31,39 @@ form {
     border: 2px solid black;
     border-radius: 20px;
     align-items:stretch;
-
+    overflow-wrap: break-word;
 }
-
-#taskInput{
+.taskInput{
     height: 3vw;
     margin: 20px;
     width: 20vw;
 }
-
-#taskForm{
+.taskForm{
     margin: 0;
     padding: 0;
     width:10vw;
-
 }
-
-
 .taskFrame{
     background-color:#fff3cd;
     margin: 5px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    height: fit-content; /* not working */
+    word-wrap: break-word;
     padding: 10px;
     border-radius: 10px;
 }
-
 p{
     height: 30px;
-    font-size: 25px;
+    font-size: 25px;  
 }
-
 .deleteButton{
-
     height: 20px;
-    width: 20px;
-    
+    width: 20px; 
 }
-
 .deleteButton::before{
     content: "✕";
-
+}
+.taskInputText{
+    font-size: 18px;
 }
