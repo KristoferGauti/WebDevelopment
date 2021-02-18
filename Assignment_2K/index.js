@@ -186,7 +186,6 @@ function createCard(inputElem, fromBackend) {
  * the post request function to post tasks to the database
  * @param {*} task is the task input element
  * @param {*} loadFromBacked is a boolean to check wether we must load from the database or not
- * @param {*} board is the board div element
  */
 function createTask(task, loadFromBacked) {
     let deleteBtn = document.createElement("div");
