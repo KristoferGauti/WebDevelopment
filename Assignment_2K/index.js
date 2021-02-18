@@ -1,9 +1,3 @@
-//Author: Kristofer Gauti
-
-//TODO: 
-//task.archived == false do not display it
-//patch {archived: true}
-
 //The Global variables
 let URL = "https://veff-boards-h1.herokuapp.com/api/v1/boards/";
 let mainTag = document.getElementsByTagName("main");
@@ -32,7 +26,7 @@ function getTasks(boardId) {
     axios.get(`${URL}${boardId}/tasks`)
     .then((response) => {
         for (task of response.data) {
-            createTask(task, true, board);
+            if (task.archived == false) createTask(task, true, board);
         }
     }).catch((error) => {console.log("ERROR! from getting the tasks.", error)});
 }
@@ -94,11 +88,12 @@ function deleteBoard(board) {
  * @param {*} taskId is the id of a given task
  */
 function deleteTask(task, boardId, taskId) {
-    axios.delete(`${URL}${boardId}/tasks/${taskId}`,
+    axios.patch(`${URL}${boardId}/tasks/${taskId}`,
         {
             archived: true
         }
-    ).then(() => {
+    ).then((response) => {
+        console.log(response);
         task.remove();
     }).catch((error) => {console.log("ERROR! from deleting task", error)});
 }
@@ -111,7 +106,7 @@ function deleteTask(task, boardId, taskId) {
  * @param {*} toBoardId is the board id where the draggable task was dropped into
  */
 function patchTask(fromBoardId, draggableTaskId, toBoardId) {
-    if (fromBoardId != toBoardId){
+    if (fromBoardId != toBoardId) {
         axios.patch(`${URL}${fromBoardId}/tasks/${draggableTaskId}`,
             {
                 boardId: toBoardId
@@ -129,7 +124,7 @@ function patchTask(fromBoardId, draggableTaskId, toBoardId) {
  * @param {*} inputElem is the element in which the user has input a value
  * @param {*} fromBackend is a boolean determining if it must load from the database or not
  */
-function createCard(inputElem, fromBackend) {
+function createCard(inputElem, fromBackend, board) {
     let divTag = document.createElement("div");
     let deleteBtn = document.createElement("div");
     let titleTag = document.createElement("p");
