@@ -1,5 +1,5 @@
 //The Global variables
-let URL = "https://veff-boards-h1.herokuapp.com/api/v1/boards/";
+let URL = "https://veff-boards-h4.herokuapp.com/api/v1/boards/";
 let mainTag = document.getElementsByTagName("main");
 let Inputs = document.getElementsByClassName("Input");
 
@@ -11,7 +11,7 @@ function loadAllBoards(){
     axios.get(URL)
     .then((response) => {
         for (board of response.data) {
-            createCard(board, true, board);
+            createCard(board, true);
             getTasks(board.id);
         }
 
@@ -77,7 +77,7 @@ function deleteBoard(board) {
         {}
     ).then(() => {
         board.remove();
-    }).catch((error) => {console.log("ERROR! from posting tasks.", error)});
+    }).catch((error) => {console.log("ERROR! from deleting boards.", error)});
 }
 
 /**
@@ -92,8 +92,7 @@ function deleteTask(task, boardId, taskId) {
         {
             archived: true
         }
-    ).then((response) => {
-        console.log(response);
+    ).then(() => {
         task.remove();
     }).catch((error) => {console.log("ERROR! from deleting task", error)});
 }
@@ -111,8 +110,7 @@ function patchTask(fromBoardId, draggableTaskId, toBoardId) {
             {
                 boardId: toBoardId
             }
-        ).then((response) => {
-            console.log(response);
+        ).then(() => {
         }).catch((error) => {console.log("ERROR! from patching draggable task", error)});
     }
 }
@@ -124,7 +122,7 @@ function patchTask(fromBoardId, draggableTaskId, toBoardId) {
  * @param {*} inputElem is the element in which the user has input a value
  * @param {*} fromBackend is a boolean determining if it must load from the database or not
  */
-function createCard(inputElem, fromBackend, board) {
+function createCard(inputElem, fromBackend) {
     let divTag = document.createElement("div");
     let deleteBtn = document.createElement("div");
     let titleTag = document.createElement("p");
@@ -164,7 +162,19 @@ function createCard(inputElem, fromBackend, board) {
         divTag.append(draggable);
     });
 
-    executeEventListener([Inputs[0], taskInput], inputElem);
+    deleteBtn.addEventListener("click", (event) => {
+        let board = event.target.parentElement;
+        if (!board.innerHTML.includes("class=\"task\"")) deleteBoard(board);
+    });
+
+    [Inputs[0], taskInput].forEach((elem) => {
+        elem.addEventListener("keypress", (event) => {
+            if (event.key === "Enter" && elem.classList.contains("taskInput")) {
+                createTask(event.target, false);
+                event.target.value = "";
+            }
+        });
+    });
 
     //To prevent reloading the page
     return false;
@@ -178,7 +188,7 @@ function createCard(inputElem, fromBackend, board) {
  * @param {*} loadFromBacked is a boolean to check wether we must load from the database or not
  * @param {*} board is the board div element
  */
-function createTask(task, loadFromBacked, board) {
+function createTask(task, loadFromBacked) {
     let deleteBtn = document.createElement("div");
     let taskDiv = document.createElement("div");
     let taskParagraph = document.createElement("p");
@@ -201,7 +211,6 @@ function createTask(task, loadFromBacked, board) {
         deleteTask(event.target.parentElement, boardId, taskId);
     });
 
-
     taskDiv.setAttribute("class", "task");
     taskDiv.setAttribute("draggable", "true");
     deleteBtn.setAttribute("class", "Ex");
@@ -210,7 +219,6 @@ function createTask(task, loadFromBacked, board) {
     taskDiv.appendChild(taskParagraph);
     taskDiv.appendChild(deleteBtn);
 
-    
     let mainTag = document.getElementsByTagName("main")[0];
     if (loadFromBacked){
         taskDiv.setAttribute("id", `${task.id}`);
@@ -228,31 +236,3 @@ function createTask(task, loadFromBacked, board) {
         board.appendChild(taskDiv);
     }  
 }
-
-/**
- * Executes two event listeners. One for the Enter key event when the
- * user has input a task name and pressed Enter. The other one is for
- * listening to onclick events. It handles the delete board functionality
- * @param {*} elementList is a list in which the elements needs a event listener "keypress"
- * @param {*} board is the board div element
- */
-function executeEventListener(elementList, board) {
-    let deleteBtn = document.getElementsByClassName("Ex");
-    
-    elementList.forEach((elem) => {
-        elem.addEventListener("keypress", (event) => {
-            if (event.key === "Enter" && elem.classList.contains("taskInput")) {
-                createTask(event.target, false, board);
-                event.target.value = "";
-            }
-        });
-    });
-    
-    Array.prototype.slice.call(deleteBtn).forEach((button) => {
-        button.addEventListener("click", (event) => {
-            let board = event.target.parentElement;
-            if (!board.innerHTML.includes("class=\"task\"")) deleteBoard(board);
-        });
-    });
-}
-
