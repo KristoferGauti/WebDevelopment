@@ -55,6 +55,7 @@ main {
     border-radius: 5px;
     margin: 0.3em;
     padding: 1.1em 0.8em 2em;
+    overflow-wrap: break-word;
 }
 
 .task {
@@ -69,4 +70,5 @@ main {
     color: #6f570e;
     height: auto;
     border-radius: 5px;
+    overflow-wrap: break-word;
 }

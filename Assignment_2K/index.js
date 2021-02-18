@@ -1,8 +1,18 @@
-let URL = "https://veff-boards-h2.herokuapp.com/api/v1/boards/";
+//Author: Kristofer Gauti
+
+//TODO: 
+//task.archived == false do not display it
+//patch {archived: true}
+
+//The Global variables
+let URL = "https://veff-boards-h1.herokuapp.com/api/v1/boards/";
 let mainTag = document.getElementsByTagName("main");
 let Inputs = document.getElementsByClassName("Input");
-let runOnce = false;
 
+/**
+ * Uses the axios API to send a http get request and 
+ * loads all the boards to the body tag
+ */
 function loadAllBoards(){
     axios.get(URL)
     .then((response) => {
@@ -13,7 +23,11 @@ function loadAllBoards(){
 
     }).catch((error) => {console.log("ERROR! from getting the boards.", error)});
 }
-
+/**
+ * Uses axios API to to send a http get request to fetch 
+ * all tasks from the database (URL)
+ * @param {*} boardId is the id of a given board
+ */
 function getTasks(boardId) {
     axios.get(`${URL}${boardId}/tasks`)
     .then((response) => {
@@ -22,7 +36,14 @@ function getTasks(boardId) {
         }
     }).catch((error) => {console.log("ERROR! from getting the tasks.", error)});
 }
-
+/**
+ * Uses axios API to send a http post request to 
+ * post a board to the database (URL). It also sets 
+ * the boardTag id attribute to the board id provided from
+ * the database
+ * @param {*} boardName is the name of the given board 
+ * @param {*} boardTag is the element holds the board title and board body
+ */
 function postBoard(boardName, boardTag) {
     axios.post(URL,
         {
@@ -33,54 +54,81 @@ function postBoard(boardName, boardTag) {
         boardTag.setAttribute("id", `${response.data.id}`);
     }).catch((error) => {console.log("ERROR! from posting boards.", error)})
 }
-
+/**
+ * Uses axios API to send a http post request to 
+ * post a task to the database (URL). It also sets 
+ * the taskDiv id attribute to the task id provided from
+ * the database
+ * @param {*} boardId is the id of a given board
+ * @param {*} taskValue is the input value or the task name
+ * @param {*} taskDiv is the container which wraps around the taskvalue
+ */
 function postTask(boardId, taskValue, taskDiv) {
     axios.post(`${URL}${boardId}/tasks`,
         {
             taskName: taskValue
         }
     ).then((response) => {
-        console.log(response.data.id);
         taskDiv.setAttribute("id", `${response.data.id}`);
     }).catch((error) => {console.log("ERROR! from posting tasks.", error)})
 }
 
+/**
+ * Deletes the board from the database and removes 
+ * the board div element from the DOM
+ * @param {*} board is a div element that represents a board
+ */
 function deleteBoard(board) {
-    board.remove();
     axios.delete(`${URL}${board.id}`,
         {}
     ).then((response) => {
+        board.remove();
     }).catch((error) => {console.log("ERROR! from posting tasks.", error)});
 }
 
+/**
+ * Deletes the task from the database and removes 
+ * the task div element from the DOM
+ * @param {*} task is a div container which wraps around a task name
+ * @param {*} boardId is the id of a given board
+ * @param {*} taskId is the id of a given task
+ */
 function deleteTask(task, boardId, taskId) {
-    task.remove();
     axios.delete(`${URL}${boardId}/tasks/${taskId}`,
-        {}
+        {
+            archived: true
+        }
     ).then((response) => {
+        task.remove();
     }).catch((error) => {console.log("ERROR! from deleting task", error)});
 }
 
+/**
+ * Uses axios API to send a patch request to modify/move a given task
+ * from a board to another 
+ * @param {*} fromBoardId is the board id of that board that the draggable task came from
+ * @param {*} draggableTaskId is the task id of that task that is a draggable element
+ * @param {*} toBoardId is the board id where the draggable task was dropped into
+ */
 function patchTask(fromBoardId, draggableTaskId, toBoardId) {
-    axios.patch(`${URL}${fromBoardId}/tasks/${draggableTaskId}`,
-        {
-            boardId: toBoardId
-        }
-    ).then((response) => {
-        console.log(response);
-    }).catch((error) => {console.log("ERROR! from patching draggable task", error)});
+    if (fromBoardId != toBoardId){
+        axios.patch(`${URL}${fromBoardId}/tasks/${draggableTaskId}`,
+            {
+                boardId: toBoardId
+            }
+        ).then((response) => {
+            console.log(response);
+        }).catch((error) => {console.log("ERROR! from patching draggable task", error)});
+    }
 }
 
-function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll(".task:not(.dragging)")];
-    return draggableElements.reduce((closestElem, childElem) => {
-        const box = childElem.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset > closestElem.offset) return {offset: offset, element: childElem};
-        else return closestElem;
-    }, {offset: Number.NEGATIVE_INFINITY }).element;
-}
-
+/**
+ * Creates a board with the title provided by the user which
+ * input a task name in the inputElem. It also sets a dragover 
+ * event listener in order for the user to drag tasks
+ * @param {*} inputElem is the element in which the user has input a value
+ * @param {*} fromBackend is a boolean determining if it must load from the database or not
+ */
 function createCard(inputElem, fromBackend) {
     let divTag = document.createElement("div");
     let deleteBtn = document.createElement("div");
@@ -117,19 +165,24 @@ function createCard(inputElem, fromBackend) {
 
     divTag.addEventListener("dragover", (event) =>{
         event.preventDefault();
-        const afterElement = getDragAfterElement(event.target, event.clientY);
         const draggable = document.querySelector(".dragging");
-        if (afterElement == null) divTag.append(draggable);
-        else divTag.insertBefore(draggable, afterElement);
+        divTag.append(draggable);
     });
 
-    //console.log(divTag); //here 1
     executeEventListener([Inputs[0], taskInput], inputElem);
 
     //To prevent reloading the page
     return false;
 }
-
+/**
+ * Creates a task and adds event listeners for the 
+ * drag and drop functionality and also for the task delete 
+ * functionality. It also loads the tasks from the backend or calls 
+ * the post request function to post tasks to the database
+ * @param {*} task is the task input element
+ * @param {*} loadFromBacked is a boolean to check wether we must load from the database or not
+ * @param {*} board is the board div element
+ */
 function createTask(task, loadFromBacked, board) {
     let deleteBtn = document.createElement("div");
     let taskDiv = document.createElement("div");
@@ -140,14 +193,12 @@ function createTask(task, loadFromBacked, board) {
         taskDiv.classList.add("dragging");
         fromboardId = event.target.parentElement.id;
     });
-    taskDiv.addEventListener("dragend", (event) => {
+    taskDiv.addEventListener("dragend", () => {
         taskDiv.classList.remove("dragging");
         let toBoardId = taskDiv.parentElement.id;
         let taskId = taskDiv.id;
         patchTask(fromboardId, taskId, toBoardId);
     });
-
-    //console.log(taskDiv); //here 2
 
     deleteBtn.addEventListener("click", (event) => {
         let boardId = event.target.parentElement.parentElement.id;
@@ -172,7 +223,6 @@ function createTask(task, loadFromBacked, board) {
             if (board.id == task.boardId) {
                 taskParagraph.innerText = task.taskName;
                 board.appendChild(taskDiv);
-                event.target.value = "";
             }
         });
     }
@@ -181,10 +231,16 @@ function createTask(task, loadFromBacked, board) {
         postTask(board.id, task.value, taskDiv);
         taskParagraph.innerText = task.value;
         board.appendChild(taskDiv);
-        event.target.value = "";
     }  
 }
 
+/**
+ * Executes two event listeners. One for the Enter key event when the
+ * user has input a task name and pressed Enter. The other one is for
+ * listening to onclick events. It handles the delete board functionality
+ * @param {*} elementList is a list in which the elements needs a event listener "keypress"
+ * @param {*} board is the board div element
+ */
 function executeEventListener(elementList, board) {
     let deleteBtn = document.getElementsByClassName("Ex");
     
@@ -192,6 +248,7 @@ function executeEventListener(elementList, board) {
         elem.addEventListener("keypress", (event) => {
             if (event.key === "Enter" && elem.classList.contains("taskInput")) {
                 createTask(event.target, false, board);
+                event.target.value = "";
             }
         });
     });
