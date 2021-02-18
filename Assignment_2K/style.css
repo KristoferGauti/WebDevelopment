@@ -44,7 +44,6 @@ main {
 
 .title {
     font-size: xx-large;
-    font-weight: 150; 
     color: #3f4346;
 }
 
@@ -65,7 +64,7 @@ main {
     margin: 0.8em 0;
     padding: 1em;
     font-size: 20px;
-    font-weight: 600;
+    font-weight: bolder;
     background-color:#fff4cd;
     color: #6f570e;
     height: auto;

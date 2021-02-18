@@ -16,7 +16,7 @@ let Inputs = document.getElementsByClassName("Input");
 function loadAllBoards(){
     axios.get(URL)
     .then((response) => {
-        for (board of response.data) {
+        for (var board of response.data) {
             createCard(board, true, board);
             getTasks(board.id);
         }
@@ -31,7 +31,7 @@ function loadAllBoards(){
 function getTasks(boardId) {
     axios.get(`${URL}${boardId}/tasks`)
     .then((response) => {
-        for (task of response.data) {
+        for (var task of response.data) {
             createTask(task, true, board);
         }
     }).catch((error) => {console.log("ERROR! from getting the tasks.", error)});
@@ -52,7 +52,7 @@ function postBoard(boardName, boardTag) {
         }
     ).then((response) => {
         boardTag.setAttribute("id", `${response.data.id}`);
-    }).catch((error) => {console.log("ERROR! from posting boards.", error)})
+    }).catch((error) => {console.log("ERROR! from posting boards.", error)});
 }
 /**
  * Uses axios API to send a http post request to 
@@ -70,7 +70,7 @@ function postTask(boardId, taskValue, taskDiv) {
         }
     ).then((response) => {
         taskDiv.setAttribute("id", `${response.data.id}`);
-    }).catch((error) => {console.log("ERROR! from posting tasks.", error)})
+    }).catch((error) => {console.log("ERROR! from posting tasks.", error)});
 }
 
 /**
@@ -81,7 +81,7 @@ function postTask(boardId, taskValue, taskDiv) {
 function deleteBoard(board) {
     axios.delete(`${URL}${board.id}`,
         {}
-    ).then((response) => {
+    ).then(() => {
         board.remove();
     }).catch((error) => {console.log("ERROR! from posting tasks.", error)});
 }
@@ -98,7 +98,7 @@ function deleteTask(task, boardId, taskId) {
         {
             archived: true
         }
-    ).then((response) => {
+    ).then(() => {
         task.remove();
     }).catch((error) => {console.log("ERROR! from deleting task", error)});
 }
@@ -145,11 +145,11 @@ function createCard(inputElem, fromBackend) {
     taskInput.setAttribute("type", "text");
     taskInput.setAttribute("class","Input taskInput");
     taskInput.setAttribute("name","taskInput");
-    taskInput.style.marginLeft = "0"
+    taskInput.style.marginLeft = "0";
     taskInput.setAttribute("placeholder","Create new task");
     if (fromBackend) {
-        divTag.setAttribute("id", `${inputElem.id}`) //where inputElem is the board
-        titleTag.innerText = inputElem.name
+        divTag.setAttribute("id", `${inputElem.id}`); //where inputElem is the board
+        titleTag.innerText = inputElem.name;
     }
     else {
         postBoard(inputElem.value, divTag); // where inputElem is the board div element
