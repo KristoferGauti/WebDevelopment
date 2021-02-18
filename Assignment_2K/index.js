@@ -16,7 +16,7 @@ let Inputs = document.getElementsByClassName("Input");
 function loadAllBoards(){
     axios.get(URL)
     .then((response) => {
-        for (var board of response.data) {
+        for (board of response.data) {
             createCard(board, true, board);
             getTasks(board.id);
         }
@@ -31,7 +31,7 @@ function loadAllBoards(){
 function getTasks(boardId) {
     axios.get(`${URL}${boardId}/tasks`)
     .then((response) => {
-        for (var task of response.data) {
+        for (task of response.data) {
             createTask(task, true, board);
         }
     }).catch((error) => {console.log("ERROR! from getting the tasks.", error)});
