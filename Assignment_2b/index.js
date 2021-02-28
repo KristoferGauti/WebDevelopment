@@ -1,198 +1,246 @@
-// The input, to create the board
-let boardForm = document.getElementById("createBoard");
+// ************* A LINK FOR A CHOOSEN GROUP OF BOARDS ************* //
+let link = "https://veff-boards-h5.herokuapp.com/api/v1/boards/";
+
 // The frame that will contain each board(in main)
 let boardBox = document.getElementById("boardFrame");
 
-let link = "https://veff-boards-h3.herokuapp.com/api/v1/boards/";
+// The input, to create the board
+let boardInput = document.getElementById("createBoard");
 
-boardForm.addEventListener("submit", (event) =>{ 
-    // evemt.target -> form[upper text, input,lower text]
-    createBoard(event.target.children[1].value, false);
-    event.preventDefault();  
+boardInput.addEventListener("submit", (event) => {
+	event.preventDefault();
+	// evemt.target -> form[upper text, input,lower text]
+	createBoard(event.target.children[1], false);
+	event.target.children[1].value = "";
 });
 
-// Getting the boards containing tasks
+// ****** GET BOARDS ****** //
+
 axios.get(link)
-    .then(response => {
-        for (board of response.data){
-            createBoard(board, true);
-            getTask(board.id);
-    }
-    })
-    .catch(error => {
-        console.log(error);
-    })
+	.then(response => {
+		for (board of response.data) {
+			createBoard(board, true);
+			getTask(board.id);
+		}
+	})
+	.catch(error => {
+		console.log(error);
+	})
 
 // ******************  FUNCTIONS  ****************** //
 
-function drop(event,boardId){
-    event.preventDefault();
-    var data = event.dataTransfer.getData(boardId);
-    event.target.appendChild(document.getElementById(data));
+
+// ******** DRAGING FUNCTIONS ******** //
+
+function drop(event) {
+	event.preventDefault();
+	var data = event.target;
+	data.appendChild(document.getElementById(data));
 }
 
-function drag(event){
-    event.dataTransfer.setData("id",event.target.id);
+function drag(event) {
+	event.dataTransfer.setData("id", event.target.id);
 }
 
-function allowDrop(event){
-    event.preventDefault();
+function allowDrop(event) {
+	event.preventDefault();
 }
 
 
+// ******** CREATE FUNCTIONS ******** //
 
 function createBoard(boardObject, isFromDatabase) {
-    // board element
-    let board = document.createElement("div");
-    board.setAttribute("class","board");
-    board.setAttribute("id",boardObject.id);
-    //board.setAttribute("ondrop",drop(event,board.id));
-    //board.setAttribute("ondragover",allowDrop(event));
+	// BOARD ELEMENT
+	let board = document.createElement("div");
+	board.setAttribute("class", "board");
 
+	board.addEventListener("dragover", (event) => {
+		event.preventDefault();
+		let movedElement = document.querySelector(".movedElement");
+		board.appendChild(movedElement);
+	})
 
-    // Delete button
-    let deleteButton = document.createElement("button");
-    deleteButton.setAttribute("class","deleteButton");
-    
-    deleteButton.addEventListener("click", (event) =>{ 
-        deleteBoard(event.target.parentElement);
-    });
+	// DELETE BOTTON
+	let deleteButton = document.createElement("button");
+	deleteButton.setAttribute("class", "deleteButton");
 
-    board.append(deleteButton);
+	deleteButton.addEventListener("click", (event) => {
 
-    // <p> inputText </p>
-    let boardText = document.createElement("p");
+		deleteBoard(event.target.parentElement);
+		event.preventDefault();
+	});
 
-    if (isFromDatabase) boardText.innerHTML = boardObject.name;
-    else{   
-        boardText.innerHTML = boardObject;
-        postBoard(boardObject);} 
+	board.append(deleteButton);
 
-    board.append(boardText);
+	// TEXT PARAGRAPH
+	let boardText = document.createElement("p");
 
-    // <form> id="createTask"> </form>
-    let taskInput = document.createElement("form"); // create element of type input
-    //taskInput.setAttribute("autocomplete", "off");
-    taskInput.setAttribute("id","taskForm");
+	// FROM DATABASE
+	if (isFromDatabase) {
+		board.setAttribute("id", boardObject.id);
+		boardText.innerHTML = boardObject.name;
+	}
+	// FROM CLIENT 
+	else {
+		boardText.innerHTML = boardObject.value;
+		postBoard(boardObject, board);
+	}
 
-    // <input id="inputText" placeholder="Create a task" type="text"> </input>
-    let theInput = document.createElement("input");
-    theInput.setAttribute("id","taskInput"); // call the input as a class
-    theInput.setAttribute("placeholder","Create a task");
-    theInput.setAttribute("type","text");
+	board.append(boardText);
 
-    //<form> 
-    // <input> </input>
-    //</form>
-    taskInput.append(theInput);
+	let taskInput = document.createElement("form");
 
-    taskInput.addEventListener("submit", (event) =>{ 
-        let task = createTask(event.target.children[0],false,board.id);
-        board.append(task);
-        event.preventDefault();
-    });
+	taskInput.setAttribute("class", "taskForm");
 
-    board.append(taskInput);
-    boardBox.append(board);
+	let theInput = document.createElement("input");
+	theInput.setAttribute("class", "taskInput");
+	theInput.setAttribute("placeholder", "Create a task");
+	theInput.setAttribute("type", "text");
+
+	taskInput.append(theInput);
+
+	taskInput.addEventListener("submit", (event) => {
+		event.preventDefault();
+		let task = createTask(event.target.children[0], false, board.id);
+		board.append(task);
+		event.target.children[0].value = "";
+	});
+
+	board.append(taskInput);
+	boardBox.append(board);
 }
 
-function createTask(taskObject, isFromDatabase, boardId){
-    let taskFrame = document.createElement("div");
-    taskFrame.setAttribute("class","taskFrame");
-    taskFrame.setAttribute("id",taskObject.id);
-    taskFrame.setAttribute("draggable", "true");
-    //taskFrame.setAttribute("ondragstart",drag(event));
+function createTask(taskInput, isFromDatabase, boardId) {
+	let taskFrame = document.createElement("div");
+	taskFrame.setAttribute("class", "taskFrame");
+	taskFrame.setAttribute("id", taskInput.id);
+	taskFrame.setAttribute("draggable", "true");
 
-    let deleteButton = document.createElement("button");
-    deleteButton.setAttribute("class","deleteButton");
+	taskFrame.addEventListener("dragstart", (event) => {
+		taskFrame.classList.add("movedElement"); // adding a class "dragableElement" into the taskFrame element
+		boardIdFrom = event.target.parentElement.id;
+		console.log(boardIdFrom);
+	})
 
-    deleteButton.addEventListener("click", (event) =>{ 
-        deleteTask(event.target.parentElement.parentElement.id, taskObject.id);
+	taskFrame.addEventListener("dragend", (event) => {
+		taskFrame.classList.remove("movedElement");
 
-    });
+		patch(boardIdFrom, event.target.id, event.target.parentElement.id);
+	})
 
-    
+	let deleteButton = document.createElement("button");
+	deleteButton.setAttribute("class", "deleteButton");
 
-    let taskText = document.createElement("p");
-    taskText.setAttribute("class","task");
+	deleteButton.addEventListener("click", (event) => {
+		deleteTask(event.target.parentElement.parentElement, taskFrame);
+	});
 
-    // FROM CLIENT
-    if (!isFromDatabase){ 
-        taskText.innerHTML = taskObject.value;
-        taskFrame.appendChild(taskText);
-        taskFrame.append(deleteButton);
-        postTask(taskObject,boardId);
+	let taskText = document.createElement("p");
+	taskText.setAttribute("class", "taskInputText");
 
-        return taskFrame;  
-    }
-    // FROM DATABASE
-    else{
-        let boardList = document.getElementById("boardFrame").childNodes;
-        for (var i=0; i< boardList.length; i++){
-            if (boardList[i].id == boardId) {
-                taskText.innerHTML = taskObject.taskName;
-                taskFrame.appendChild(taskText);
-                boardList[i].append(taskFrame);
-                taskFrame.append(deleteButton);
-                return null;
+	// FROM CLIENT
+	if (!isFromDatabase) {
+		console.log(boardId);
+		taskText.innerHTML = taskInput.value;
+		taskFrame.appendChild(taskText);
+		taskFrame.append(deleteButton);
+		postTask(taskInput, boardId, taskFrame);
+		return taskFrame;
+	}
+	// FROM DATABASE
+	else {
+		let boardList = document.getElementById("boardFrame").childNodes;
+		for (var i = 0; i < boardList.length; i++) {
+			if (boardList[i].id == boardId) {
+				taskText.innerHTML = taskInput.taskName;
+				taskFrame.appendChild(taskText);
+				boardList[i].append(taskFrame);
+				taskFrame.append(deleteButton);
+				return null;
+			}
+		}
+	}
+}
+
+
+// ******** GET, POST, DELETE and PATCH FUCNTIONS ******** //
+
+function getTask(boardId) {
+	axios.get(link + boardId + "/tasks")
+		.then(response => {
+			for (task of response.data) {
+				createTask(task, true, boardId);
+			}
+		})
+		.catch(error => {
+			console.log(error);
+		})
+}
+
+function postBoard(boardObject, boardElement) {
+
+	axios.post(link, {
+			name: boardObject.value,
+			description: ""
+		})
+		.then((response) => {
+			console.log("Board Created");
+			boardElement.setAttribute("id", response.data.id);
+		})
+		.catch((error) => console.log(error))
+}
+
+function postTask(inputElement, boardId, taskElem) {
+
+	axios.post(link + boardId + '/tasks', {
+			taskName: inputElement.value,
+		})
+		.then((response) => {
+			console.log(taskElem);
+			taskElem.setAttribute("id", response.data.id);
+
+		})
+		.catch((error) => {
+			console.log(error)
+		})
+}
+
+function deleteBoard(board) {
+	console.log(board.id);
+	axios.delete(link + board.id, {})
+		.then((response) => {
+			console.log("Deleating board works");
+			board.remove();
+		})
+		.catch((error) => {
+            // THE ERROR IS EXECUTED WHEN THE BOARD CONTAINS TASKS
+            // SO AT FIRST, THE TASKS ARE REMOVED AND THEN THE BOARD IS REMOVED
+            for (var i = 0; i < board.childElementCount; i++){
+                if (board.childNodes[i].className = "taskFrame") deleteTask(board,board.childNodes[i]);
             }
-        } 
-    }
+            deleteBoard(board);
+		})
 }
 
-function postBoard(boardDescription){
+function deleteTask(board, task) {
+	console.log(task.id);
+	axios.delete(link + board.id + "/tasks/" + task.id, {}).then((response) => {
+		console.log("deleting task successful");
+		task.remove();
 
-    axios.post(link, {
-        name: boardDescription,
-        description: ""
-    })
-    .then((response)=>{
-        console.log("Board Created");
-    })
-    .catch((error) => console.log(error))
+	}).catch((error) => {
+		console.log(error)
+	});
 }
 
-function deleteBoard(board){
-    console.log(board.id);
-    axios.delete(link + board.id, {})
-    .then((response)=>{
-        console.log("Deleating board works");
-    })
-    .catch((error)=>{console.log(error)})
+function patch(boardId, taskId, newBoardId) {
+	axios.patch(link + boardId + "/tasks/" + taskId, {
+			boardId: newBoardId,
+		})
+		.then((response) => {
+			console.log("Task moved!");
+		})
+		.catch((error) => {
+			console.log(error);
+		})
 }
-
-function deleteTask(boardId, taskId){
-    axios.delete(link + boardId + "/tasks/" + taskId,
-        {}
-    ).then((response) => {
-        console.log("deleting task successful");
-    }).catch((error) => {console.log(error)});
-}
-
-function postTask(taskObject, boardId){
-    console.log(taskObject.value);
-    axios.post(link + boardId + '/tasks', {
-        taskName: taskObject.value
-    })
-    .then((response) =>{
-        taskObject.setAttribute("id",response.data.id);
-    })
-    .catch((error)=>{console.log(error)})
-
-
-}
-
-function getTask(boardId){
-    axios.get(link + boardId + "/tasks")
-    .then(response => {
-        for (task of response.data){
-            createTask(task,true,boardId);
-        }
-    })
-    .catch(error => {
-        console.log(error);
-    })
-}
-
-//function patch
-
