@@ -46,9 +46,20 @@ app.get("/", (request, resonse) => {
 });
 
 app.get("/api/v1/boards", (request, response) => {
-    for (board of boards) {
-        console.log(board);
+    response.send(boards);
+});
+
+function getTasks(id) {
+    for (task of tasks) {
+        if (task.boardId == id) {
+            console.log(task)
+        }
     }
+}
+
+app.get("/api/v1/boards/:id/tasks", async (request, response) => {
+    task = await getTasks(request.params.id)
+    response.send(task)
 });
 
 
