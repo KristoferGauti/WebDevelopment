@@ -1,11 +1,14 @@
-//Sample for Assignment 3
+//required modules
 const express = require('express');
+const path = require("path");
+const fs = require("fs"); //file system
 
 //Import a body parser module to be able to access the request body as json
 const bodyParser = require('body-parser');
 
 //Use cors to avoid issues with testing on localhost
 const cors = require('cors');
+const { response } = require('express');
 
 const app = express();
 
@@ -14,6 +17,10 @@ var port = process.env.PORT || 3000;
 
 //Tell express to use the body parser module
 app.use(bodyParser.json());
+
+//Tell express where our static files are located
+const staticFilesPath = __dirname + "/modSolutionA2"
+app.use(express.static(staticFilesPath));
 
 //Tell express to use cors -- enables CORS for this backend
 app.use(cors());  
@@ -33,10 +40,17 @@ var tasks = [
 ];
 
 //Your endpoints go here
-app.get("/", (request, response) => {
-    console.log(request);
-    response.send("Hello world!");
+
+app.get("/", (request, resonse) => {
+    resonse.sendFile(staticFilesPath + "/solution.html");
 });
+
+app.get("/api/v1/boards", (request, response) => {
+    for (board of boards) {
+        console.log(board);
+    }
+});
+
 
 //Start the server
 app.listen(port, () => {
