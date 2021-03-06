@@ -33,9 +33,12 @@ var tasks = [
 ];
 
 //Your endpoints go here
-
+app.get("/", (request, response) => {
+    console.log(request);
+    response.send("Hello world!");
+});
 
 //Start the server
 app.listen(port, () => {
-    console.log('Event app listening...');
+    console.log(`Event app listening on port: ${port}`);
 });
