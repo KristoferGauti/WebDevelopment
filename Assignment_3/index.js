@@ -42,25 +42,20 @@ var tasks = [
 //Your endpoints go here
 
 app.get("/", (request, resonse) => {
-    resonse.sendFile(staticFilesPath + "/solution.html");
+    resonse.status(200).sendFile(staticFilesPath + "/solution.html");
 });
 
 app.get("/api/v1/boards", (request, response) => {
-    response.send(boards);
+    response.status(200).send(boards);
 });
 
-function getTasks(id) {
-    for (task of tasks) {
-        if (task.boardId == id) {
-            console.log(task)
-        }
-    }
-}
 
-app.get("/api/v1/boards/:id/tasks", async (request, response) => {
-    task = await getTasks(request.params.id)
-    response.send(task)
+app.get("/api/v1/boards/:id/tasks", (request, response) => {
+    //console.log(request.params.id);
+    response.status(200).send([tasks[request.params.id]]);
 });
+
+
 
 
 //Start the server
