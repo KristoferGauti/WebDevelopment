@@ -1,7 +1,6 @@
 //required modules
 const express = require('express');
 const path = require("path");
-const fs = require("fs"); //file system
 
 //Import a body parser module to be able to access the request body as json
 const bodyParser = require('body-parser');
@@ -22,6 +21,7 @@ app.use(bodyParser.json());
 const staticFilesPath = __dirname + "/modSolutionA2"
 app.use(express.static(staticFilesPath));
 
+
 //Tell express to use cors -- enables CORS for this backend
 app.use(cors());  
 
@@ -40,6 +40,9 @@ var tasks = [
 ];
 
 //Your endpoints go here
+app.get('/favico.ico', (req, res) => {
+    res.sendFile(path.join(__dirname, "modSolutionA2", "/favicon.ico"));
+});
 
 app.get("/", (request, resonse) => {
     resonse.status(200).sendFile(staticFilesPath + "/solution.html");
