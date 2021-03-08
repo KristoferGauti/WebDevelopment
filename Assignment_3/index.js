@@ -140,6 +140,16 @@ app.delete("/api/v1/boards/:id", (request, response) => {
     
 });
 
+app.patch("/api/v1/boards/:id/tasks/:id", (request,response) => {
+    console.log("Executed!")
+    for (let i = 0; i < tasks.length; i++){
+        if (parseInt(tasks[i].id) == parseInt(request.params.id)){
+            tasks[i].archived = true;
+        }
+    }
+    response.send(tasks);
+})
+
 function boardContainsTasks(boardId){
     for (task of tasks){
         if (task.boardId == boardId && !task.archived){return true;}
