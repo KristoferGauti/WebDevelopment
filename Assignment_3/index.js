@@ -6,7 +6,7 @@
     ERROR try catch in every single HTTP requests (response.status(X) where X is a status code)
     
     Update board
-    Delete all boards
+    Delete all boards ---> partially done because I dont understand "The request,if successful, returns all deleted boards (all attributes), as well as their tasks (as a part of the tasks attribute)."
     Partially update a task for a board 
 */
 
@@ -154,10 +154,10 @@ app.post("/api/v1/boards/:id/tasks", (request, response) => {
 app.post("/api/v1/boards", (request, response) => {
     let newBoardId = generateId(boards);
     const responseBoard = {
-        "id": newBoardId, 
-        "name": request.body.name, 
-        "description": "", 
-        "tasks": [] 
+        id: newBoardId, 
+        name: request.body.name, 
+        description: "", 
+        tasks: [] 
     }
     boards.push(responseBoard);
     response.status(200).send(responseBoard);
@@ -182,17 +182,24 @@ app.delete("/api/v1/boards/:id", (request, response) => {
     response.status(404).send()
 });
 
+app.delete("/api/v1/boards", (request, response) => {
+    let deletedItems = boards.concat(tasks);
+    boards = boards.slice(boards.length);
+    tasks = tasks.slice(tasks.length);
+    response.status(200).send(deletedItems);
+});
+
 app.patch("/api/v1/boards/:id/tasks/:id", (request,response) => {
     let responseTask;
     for (let i = 0; i < tasks.length; i++){
         if (parseInt(tasks[i].id) == parseInt(request.params.id)){
             tasks[i].archived = true;
-            responseTask = tasks[i]
-            break
+            responseTask = tasks[i];
+            break;
         }
     }
     response.send(responseTask);
-})
+});
 
 
 //Start the server
