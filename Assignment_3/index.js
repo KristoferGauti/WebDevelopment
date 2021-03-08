@@ -1,3 +1,10 @@
+/*
+    TODO 
+    Change the date on cards to be the date today
+    update 
+*/
+
+
 //required modules
 const express = require('express');
 const path = require("path");
@@ -40,13 +47,38 @@ var tasks = [
 ];
 
 function getData(arr, id) {
-    let responseTask;
+    let data;
     for (let i = 0; i <= arr.length-1; i++) {
         if (arr[i].id == id) {
-            responseTask = arr[i]
+            data = arr[i]
         }
     }
-    return responseTask
+    return data
+}
+
+function boardContainsTasks(boardId){
+    for (task of tasks){
+        if (task.boardId == boardId && !task.archived){return true;}
+    }
+    return false;
+}
+
+function generateId(arr) {
+    let newId = 0;
+    // take the newid and for each board check it's id. It newid matches a id, break for loop and do it again
+    let idNotFound = true;
+
+    while (idNotFound){
+        idNotFound = false;
+        for (item of arr){
+            if (parseInt(item.id) === parseInt(newId)) {
+                newId++; 
+                idNotFound = true; 
+                break;
+            } 
+        }
+    }
+    return newId
 }
 
 //Your endpoints go here
@@ -94,21 +126,25 @@ app.get("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
     response.status(200).send(responseTask);
 });
 
-app.post("/api/v1/boards", (request, response) => {
-    let newBoardId = 0;
-    // take the newid and for each board check it's id. It newid matches a id, break for loop and do it again
-    let idNotFound = true;
+app.post("/api/v1/boards/:id/tasks", (request, response) => {
+    newTaskId = generateId(tasks)
+    console.log(newTaskId);
 
-    while (idNotFound){
-        idNotFound = false;
-        for (b of boards){
-            if (parseInt(b.id) === parseInt(newBoardId)) {
-                newBoardId++; 
-                idNotFound = true; 
-                break;
-            } 
-        }
+    const responseTask = {
+        id: String(newTaskId), 
+        boardId: request.params.id, 
+        taskName: request.body.taskName, 
+        dateCreated: new Date(Date.UTC(2021, 00, 21, 15, 48)), 
+        archived: false
     }
+    tasks.push(responseTask);
+    let theBoard = getData(boards, responseTask.boardId)
+    theBoard.tasks.push(responseTask.id)
+    response.status(200).send(responseTask)
+});
+
+app.post("/api/v1/boards", (request, response) => {
+    let newBoardId = generateId(boards);
     const responseBoard = {
         "id": newBoardId, 
         "name": request.body.name, 
@@ -126,9 +162,7 @@ app.put("/api/v1/boards", (request, response) => {
 
 app.delete("/api/v1/boards/:id", (request, response) => {
     let responseBoard;
-
     if (!boardContainsTasks(request.params.id)){
-
         for (let i = 0; i <= boards.length-1; i++) {
             if (boards[i].id == request.params.id) {
                 responseBoard = boards[i]
@@ -137,7 +171,6 @@ app.delete("/api/v1/boards/:id", (request, response) => {
         }
         response.status(200).send(responseBoard);
     }
-    
 });
 
 app.patch("/api/v1/boards/:id/tasks/:id", (request,response) => {
@@ -149,14 +182,6 @@ app.patch("/api/v1/boards/:id/tasks/:id", (request,response) => {
     }
     response.send(tasks);
 })
-
-function boardContainsTasks(boardId){
-    for (task of tasks){
-        if (task.boardId == boardId && !task.archived){return true;}
-    }
-    return false;
-}
-
 
 
 //Start the server
