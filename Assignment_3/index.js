@@ -6,7 +6,6 @@
     ERROR try catch in every single HTTP requests (response.status(X) where X is a status code)
     
     Update board
-    Delete all boards ---> partially done because I dont understand "The request,if successful, returns all deleted boards (all attributes), as well as their tasks (as a part of the tasks attribute)."
     Partially update a task for a board 
 */
 
@@ -164,8 +163,7 @@ app.post("/api/v1/boards", (request, response) => {
 });
 
 app.put("/api/v1/boards", (request, response) => {
-    console.log(request.body)
-    //Implement later!!!!!!!!!!
+
 });
 
 app.delete("/api/v1/boards/:id", (request, response) => {
@@ -183,7 +181,16 @@ app.delete("/api/v1/boards/:id", (request, response) => {
 });
 
 app.delete("/api/v1/boards", (request, response) => {
-    let deletedItems = boards.concat(tasks);
+    for (board of boards) {
+        for (taskId of board.tasks) {
+            let task = getData(tasks, taskId);
+            if (task.id == taskId) {
+                let index = board.tasks.indexOf(task.id)
+                board.tasks[index] = task
+            }
+        }
+    }
+    let deletedItems = [...boards];
     boards = boards.slice(boards.length);
     tasks = tasks.slice(tasks.length);
     response.status(200).send(deletedItems);
