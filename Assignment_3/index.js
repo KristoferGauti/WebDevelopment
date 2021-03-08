@@ -87,12 +87,12 @@ function generateId(arr) {
 }
 
 //Your endpoints go here
-app.get('/favico.ico', (req, res) => {
-    res.sendFile(path.join(__dirname, "modSolutionA2", "/favicon.ico"));
+app.get('/favico.ico', (request, response) => {
+    response.sendFile(path.join(__dirname, "modSolutionA2", "/favicon.ico"));
 });
 
-app.get("/", (request, resonse) => {
-    resonse.status(200).sendFile(staticFilesPath + "/solution.html");
+app.get("/", (request, response) => {
+    response.status(200).sendFile(staticFilesPath + "/solution.html");
 });
 
 app.get("/api/v1/boards", (request, response) => {
@@ -162,13 +162,16 @@ app.post("/api/v1/boards", (request, response) => {
     response.status(200).send(responseBoard);
 });
 
-app.put("/api/v1/boards", (request, response) => {
-
+app.put("/api/v1/boards/:id", (request, response) => {
+    let updatedBoard = getData(boards, request.params.id);
+    updatedBoard.name = request.body.name;
+    updatedBoard.description = request.body.description;
+    response.status(200).send(updatedBoard);
 });
 
 app.delete("/api/v1/boards/:id", (request, response) => {
     let responseBoard;
-    if (!boardContainsTasks(request.params.id)){
+    if (!boardContainsTasks(request.params.id)) {
         for (let i = 0; i <= boards.length-1; i++) {
             if (boards[i].id == request.params.id) {
                 responseBoard = boards[i]
@@ -207,7 +210,6 @@ app.patch("/api/v1/boards/:id/tasks/:id", (request,response) => {
     }
     response.send(responseTask);
 });
-
 
 //Start the server
 app.listen(port, () => {
