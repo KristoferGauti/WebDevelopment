@@ -5,7 +5,6 @@
     The request for create a board, if successful, shall return the new board (all attributes, including id and tasks array).
     ERROR try catch in every single HTTP requests (response.status(X) where X is a status code)
     
-    Update board
     Partially update a task for a board 
 */
 
@@ -51,6 +50,8 @@ var tasks = [
     { id: '3', boardId: '3', taskName: "Prepare assignment 2", dateCreated: new Date(Date.UTC(2021, 00, 10, 16, 00)), archived: true }
 ];
 
+// ############# HELPER FUNCTIONS #############
+
 function getData(arr, id) {
     let data;
     for (let i = 0; i <= arr.length-1; i++) {
@@ -70,7 +71,6 @@ function boardContainsTasks(boardId){
 
 function generateId(arr) {
     let newId = 0;
-    // take the newid and for each board check it's id. It newid matches a id, break for loop and do it again
     let idNotFound = true;
 
     while (idNotFound){
@@ -86,24 +86,40 @@ function generateId(arr) {
     return newId
 }
 
-//Your endpoints go here
-app.get('/favico.ico', (request, response) => {
-    response.sendFile(path.join(__dirname, "modSolutionA2", "/favicon.ico"));
+// ############# ENDPOINTS #############
+
+/*
+ * WHUT THE FUCK IS THAT???
+ */
+app.get('/favico.ico', (req, res) => {
+    res.sendFile(path.join(__dirname, "modSolutionA2", "/favicon.ico"));
 });
 
-app.get("/", (request, response) => {
-    response.status(200).sendFile(staticFilesPath + "/solution.html");
+/*
+ * Display the home page
+ */
+app.get("/", (request, resonse) => {
+    resonse.status(200).sendFile(staticFilesPath + "/solution.html");
 });
 
+/*
+ * Get all boards
+ */
 app.get("/api/v1/boards", (request, response) => {
     response.status(200).send(boards);
 });
 
+/*
+ * Get a board (id)
+ */
 app.get("/api/v1/boards/:id", (request, response) => {
     let responseBoard = getData(boards, request.params.id);
     response.status(200).send(responseBoard);
 });
 
+/*
+ * Get all tasks from a board (id)
+ */
 app.get("/api/v1/boards/:id/tasks", (request, response) => {
     let responseTasks = [];
     let taskIds;
@@ -120,6 +136,9 @@ app.get("/api/v1/boards/:id/tasks", (request, response) => {
     response.status(200).send(responseTasks);
 });
 
+/*
+ *  Load task (tid) to a board (bid)
+ */
 app.get("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
     let responseTask;
     for (board of boards) {
@@ -135,6 +154,9 @@ app.get("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
     response.status(200).send(responseTask)
 });
 
+/*
+ * Create a new task to a board (id)
+ */
 app.post("/api/v1/boards/:id/tasks", (request, response) => {
     newTaskId = generateId(tasks)
     const responseTask = {
@@ -150,6 +172,9 @@ app.post("/api/v1/boards/:id/tasks", (request, response) => {
     response.status(200).send(responseTask)
 });
 
+/*
+ * Create a board, with a generated id
+ */
 app.post("/api/v1/boards", (request, response) => {
     let newBoardId = generateId(boards);
     const responseBoard = {
@@ -169,6 +194,9 @@ app.put("/api/v1/boards/:id", (request, response) => {
     response.status(200).send(updatedBoard);
 });
 
+/*
+ * Delete a board (id)
+ */
 app.delete("/api/v1/boards/:id", (request, response) => {
     let responseBoard;
     if (!boardContainsTasks(request.params.id)) {
@@ -183,6 +211,9 @@ app.delete("/api/v1/boards/:id", (request, response) => {
     response.status(404).send()
 });
 
+/*
+ * Delete all boards
+ */
 app.delete("/api/v1/boards", (request, response) => {
     for (board of boards) {
         for (taskId of board.tasks) {
@@ -199,16 +230,21 @@ app.delete("/api/v1/boards", (request, response) => {
     response.status(200).send(deletedItems);
 });
 
-app.patch("/api/v1/boards/:id/tasks/:id", (request,response) => {
-    let responseTask;
+/*
+ * Update a task (tid) on a board (bid)
+ */
+app.patch("/api/v1/boards/:bid/tasks/:tid", (request,response) => {
+    let newtask;
+
     for (let i = 0; i < tasks.length; i++){
-        if (parseInt(tasks[i].id) == parseInt(request.params.id)){
-            tasks[i].archived = true;
-            responseTask = tasks[i];
-            break;
+        if (parseInt(tasks[i].id) == parseInt(request.params.tid)){
+            newtask = getData(tasks,tasks[i].id);
+            newtask.taskName = request.body.taskName;
+            newtask.boardId = request.body.boardId;
+            newtask.archived = request.body.archived;
         }
     }
-    response.send(responseTask);
+    response.send(newtask);
 });
 
 //Start the server
