@@ -39,6 +39,16 @@ var tasks = [
     { id: '3', boardId: '3', taskName: "Prepare assignment 2", dateCreated: new Date(Date.UTC(2021, 00, 10, 16, 00)), archived: true }
 ];
 
+function getData(arr, id) {
+    let responseTask;
+    for (let i = 0; i <= arr.length-1; i++) {
+        if (arr[i].id == id) {
+            responseTask = arr[i]
+        }
+    }
+    return responseTask
+}
+
 //Your endpoints go here
 app.get('/favico.ico', (req, res) => {
     res.sendFile(path.join(__dirname, "modSolutionA2", "/favicon.ico"));
@@ -53,24 +63,24 @@ app.get("/api/v1/boards", (request, response) => {
 });
 
 app.get("/api/v1/boards/:id", (request, response) => {
-    let responseBoard;
-    for (let i = 0; i <= boards.length-1; i++) {
-        if (boards[i].id == request.params.id) {
-            responseBoard = boards[i]
-        }
-    }
+    let responseBoard = getData(boards, request.params.id);
     response.status(200).send(responseBoard);
 });
 
 app.get("/api/v1/boards/:id/tasks", (request, response) => {
-    let responseTask;
-    for (let i = 0; i <= tasks.length-1; i++) {
-        if (tasks[i].id == request.params.id) {
-            responseTask = tasks[i]
+    let responseTasks = [];
+    let taskIds;
+    for (board of boards) {
+        if (board.id == request.params.id) {
+            taskIds = board.tasks
         }
     }
-
-    response.status(200).send([responseTask]);
+    for (task of tasks) {
+        for (taskId of taskIds) {
+            if (task.id == taskId) responseTasks.push(task)
+        }
+    }
+    response.status(200).send(responseTasks);
 });
 
 app.get("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
@@ -99,15 +109,12 @@ app.post("/api/v1/boards", (request, response) => {
             } 
         }
     }
-
     const responseBoard = {
         "id": newBoardId, 
         "name": request.body.name, 
         "description": "", 
         "tasks": [] 
     }
-
-    console.log("NewBoardId: " + newBoardId)
     boards.push(responseBoard);
     response.status(200).send(responseBoard);
 });
