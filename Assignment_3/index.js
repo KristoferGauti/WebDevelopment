@@ -52,11 +52,50 @@ app.get("/api/v1/boards", (request, response) => {
     response.status(200).send(boards);
 });
 
-
 app.get("/api/v1/boards/:id/tasks", (request, response) => {
-    //console.log(request.params.id);
-    response.status(200).send([tasks[request.params.id]]);
+    let responseTask;
+    for (let i = 0; i <= tasks.length-1; i++) {
+        if (tasks[i].id == request.params.id) {
+            responseTask = tasks[i]
+        }
+    }
+
+    response.status(200).send([responseTask]);
 });
+
+app.post("/api/v1/boards", (request, response) => {
+    let newBoardId = 0;
+    boards.find(b => {
+        console.log("BoardID: " + b.id)
+        if (parseInt(b.id) === parseInt(newBoardId)) newBoardId++ //Why does this not work Bergur, why is 3 != 3?
+    });
+    const responseBoard = {
+        id: newBoardId, 
+        name: request.body.name, 
+        description: "", 
+        tasks: [] 
+    }
+    console.log("NewBoardId: " + newBoardId)
+    boards.push(responseBoard);
+    response.status(200).send(responseBoard);
+});
+
+app.put("/api/v1/boards", (request, response) => {
+    console.log(request.body)
+    //Implement later!!!!!!!!!!
+});
+
+app.delete("/api/v1/boards/:id", (request, response) => {
+    let responseBoard;
+    for (let i = 0; i <= boards.length-1; i++) {
+        if (boards[i].id == request.params.id) {
+            responseBoard = boards[i]
+            boards.splice(i, 1); //Why does this not work Bergur!!?
+        }
+    }
+    response.status(200).send(responseBoard);
+});
+
 
 
 
