@@ -65,16 +65,24 @@ app.get("/api/v1/boards/:id/tasks", (request, response) => {
 
 app.post("/api/v1/boards", (request, response) => {
     let newBoardId = 0;
-    boards.find(b => {
-        console.log("BoardID: " + b.id)
-        if (parseInt(b.id) === parseInt(newBoardId)) newBoardId++ //Why does this not work Bergur, why is 3 != 3?
-    });
+    // take the newid and for each board check it's id. It newid matches a id, break for loop and do it again
+    let idNotFound = true;
+
+    while (idNotFound){
+        idNotFound = false;
+        for (b of boards){
+            //console.log("BoardID: " + b.id)
+            if (parseInt(b.id) === parseInt(newBoardId)){newBoardId++; idNotFound = true; break;} 
+        };
+    }
+
     const responseBoard = {
         id: newBoardId, 
         name: request.body.name, 
         description: "", 
         tasks: [] 
     }
+
     console.log("NewBoardId: " + newBoardId)
     boards.push(responseBoard);
     response.status(200).send(responseBoard);
