@@ -52,6 +52,16 @@ app.get("/api/v1/boards", (request, response) => {
     response.status(200).send(boards);
 });
 
+app.get("/api/v1/boards/:id", (request, response) => {
+    let responseBoard;
+    for (let i = 0; i <= boards.length-1; i++) {
+        if (boards[i].id == request.params.id) {
+            responseBoard = boards[i]
+        }
+    }
+    response.status(200).send(responseBoard);
+});
+
 app.get("/api/v1/boards/:id/tasks", (request, response) => {
     let responseTask;
     for (let i = 0; i <= tasks.length-1; i++) {
@@ -63,6 +73,17 @@ app.get("/api/v1/boards/:id/tasks", (request, response) => {
     response.status(200).send([responseTask]);
 });
 
+app.get("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
+    let responseTask;
+    for (let i = 0; i <= boards.length-1; i++) {
+        if (tasks[i].id == request.params.tid) {
+            responseTask = tasks[i]
+        }
+    }
+   
+    response.status(200).send(responseTask);
+});
+
 app.post("/api/v1/boards", (request, response) => {
     let newBoardId = 0;
     // take the newid and for each board check it's id. It newid matches a id, break for loop and do it again
@@ -71,16 +92,19 @@ app.post("/api/v1/boards", (request, response) => {
     while (idNotFound){
         idNotFound = false;
         for (b of boards){
-            //console.log("BoardID: " + b.id)
-            if (parseInt(b.id) === parseInt(newBoardId)){newBoardId++; idNotFound = true; break;} 
-        };
+            if (parseInt(b.id) === parseInt(newBoardId)) {
+                newBoardId++; 
+                idNotFound = true; 
+                break;
+            } 
+        }
     }
 
     const responseBoard = {
-        id: newBoardId, 
-        name: request.body.name, 
-        description: "", 
-        tasks: [] 
+        "id": newBoardId, 
+        "name": request.body.name, 
+        "description": "", 
+        "tasks": [] 
     }
 
     console.log("NewBoardId: " + newBoardId)
@@ -98,9 +122,10 @@ app.delete("/api/v1/boards/:id", (request, response) => {
     for (let i = 0; i <= boards.length-1; i++) {
         if (boards[i].id == request.params.id) {
             responseBoard = boards[i]
-            boards.splice(i, 1); //Why does this not work Bergur!!?
+            boards = boards.filter(el => el != boards[i])
         }
     }
+    console.log(boards)
     response.status(200).send(responseBoard);
 });
 
