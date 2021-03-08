@@ -123,18 +123,21 @@ app.get("/api/v1/boards/:id/tasks", (request, response) => {
 
 app.get("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
     let responseTask;
-    for (let i = 0; i <= boards.length-1; i++) {
-        if (tasks[i].id == request.params.tid) {
-            responseTask = tasks[i]
+    for (board of boards) {
+        if (board.id == request.params.bid) {
+            for (task of tasks) {
+                if (task.id == request.params.tid && 
+                    board.tasks.includes(request.params.tid)) {
+                    responseTask = task
+                }
+            }
         }
     }
-    response.status(200).send(responseTask);
+    response.status(200).send(responseTask)
 });
 
 app.post("/api/v1/boards/:id/tasks", (request, response) => {
     newTaskId = generateId(tasks)
-    console.log(newTaskId);
-
     const responseTask = {
         id: String(newTaskId), 
         boardId: request.params.id, 
