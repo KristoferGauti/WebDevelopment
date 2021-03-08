@@ -126,17 +126,26 @@ app.put("/api/v1/boards", (request, response) => {
 
 app.delete("/api/v1/boards/:id", (request, response) => {
     let responseBoard;
-    for (let i = 0; i <= boards.length-1; i++) {
-        if (boards[i].id == request.params.id) {
-            responseBoard = boards[i]
-            boards = boards.filter(el => el != boards[i])
+
+    if (!boardContainsTasks(request.params.id)){
+
+        for (let i = 0; i <= boards.length-1; i++) {
+            if (boards[i].id == request.params.id) {
+                responseBoard = boards[i]
+                boards.splice(i, 1);
+            }
         }
+        response.status(200).send(responseBoard);
     }
-    console.log(boards)
-    response.status(200).send(responseBoard);
+    
 });
 
-
+function boardContainsTasks(boardId){
+    for (task of tasks){
+        if (task.boardId == boardId && !task.archived){return true;}
+    }
+    return false;
+}
 
 
 
