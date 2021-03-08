@@ -1,5 +1,5 @@
 // ************* A LINK FOR A CHOOSEN GROUP OF BOARDS ************* //
-let link = "https://veff-boards-h5.herokuapp.com/api/v1/boards/";
+let link = "https://veff-boards-h3.herokuapp.com/api/v1/boards/";
 
 // The frame that will contain each board(in main)
 let boardBox = document.getElementById("boardFrame");
@@ -8,24 +8,24 @@ let boardBox = document.getElementById("boardFrame");
 let boardInput = document.getElementById("createBoard");
 
 boardInput.addEventListener("submit", (event) => {
-	event.preventDefault();
-	// evemt.target -> form[upper text, input,lower text]
-	createBoard(event.target.children[1], false);
-	event.target.children[1].value = "";
+    event.preventDefault();
+    // evemt.target -> form[upper text, input,lower text]
+    createBoard(event.target.children[1], false);
+    event.target.children[1].value = "";
 });
 
 // ****** GET BOARDS ****** //
 
 axios.get(link)
-	.then(response => {
-		for (board of response.data) {
-			createBoard(board, true);
-			getTask(board.id);
-		}
-	})
-	.catch(error => {
-		console.log(error);
-	})
+    .then(response => {
+        for (board of response.data) {
+            createBoard(board, true);
+            getTask(board.id);
+        }
+    })
+    .catch(error => {
+        console.log(error);
+    })
 
 // ******************  FUNCTIONS  ****************** //
 
@@ -33,214 +33,208 @@ axios.get(link)
 // ******** DRAGING FUNCTIONS ******** //
 
 function drop(event) {
-	event.preventDefault();
-	var data = event.target;
-	data.appendChild(document.getElementById(data));
+    event.preventDefault();
+    var data = event.target;
+    data.appendChild(document.getElementById(data));
 }
 
 function drag(event) {
-	event.dataTransfer.setData("id", event.target.id);
+    event.dataTransfer.setData("id", event.target.id);
 }
 
 function allowDrop(event) {
-	event.preventDefault();
+    event.preventDefault();
 }
 
 
 // ******** CREATE FUNCTIONS ******** //
 
 function createBoard(boardObject, isFromDatabase) {
-	// BOARD ELEMENT
-	let board = document.createElement("div");
-	board.setAttribute("class", "board");
+    // BOARD ELEMENT
+    let board = document.createElement("div");
+    board.setAttribute("class", "board");
 
-	board.addEventListener("dragover", (event) => {
-		event.preventDefault();
-		let movedElement = document.querySelector(".movedElement");
-		board.appendChild(movedElement);
-	})
+    board.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        let movedElement = document.querySelector(".movedElement");
+        board.appendChild(movedElement);
+    })
 
-	// DELETE BOTTON
-	let deleteButton = document.createElement("button");
-	deleteButton.setAttribute("class", "deleteButton");
+    // DELETE BOTTON
+    let deleteButton = document.createElement("button");
+    deleteButton.setAttribute("class", "deleteButton");
 
-	deleteButton.addEventListener("click", (event) => {
+    deleteButton.addEventListener("click", (event) => {
 
-		deleteBoard(event.target.parentElement);
-		event.preventDefault();
-	});
+        deleteBoard(event.target.parentElement);
+        event.preventDefault();
+    });
 
-	board.append(deleteButton);
+    board.append(deleteButton);
 
-	// TEXT PARAGRAPH
-	let boardText = document.createElement("p");
+    // TEXT PARAGRAPH
+    let boardText = document.createElement("p");
 
-	// FROM DATABASE
-	if (isFromDatabase) {
-		board.setAttribute("id", boardObject.id);
-		boardText.innerHTML = boardObject.name;
-	}
-	// FROM CLIENT 
-	else {
-		boardText.innerHTML = boardObject.value;
-		postBoard(boardObject, board);
-	}
+    // FROM DATABASE
+    if (isFromDatabase) {
+        board.setAttribute("id", boardObject.id);
+        boardText.innerHTML = boardObject.name;
+    }
+    // FROM CLIENT 
+    else {
+        boardText.innerHTML = boardObject.value;
+        postBoard(boardObject, board);
+    }
 
-	board.append(boardText);
+    board.append(boardText);
 
-	let taskInput = document.createElement("form");
+    let taskInput = document.createElement("form");
 
-	taskInput.setAttribute("class", "taskForm");
+    taskInput.setAttribute("class", "taskForm");
 
-	let theInput = document.createElement("input");
-	theInput.setAttribute("class", "taskInput");
-	theInput.setAttribute("placeholder", "Create a task");
-	theInput.setAttribute("type", "text");
+    let theInput = document.createElement("input");
+    theInput.setAttribute("class", "taskInput");
+    theInput.setAttribute("placeholder", "Create a task");
+    theInput.setAttribute("type", "text");
 
-	taskInput.append(theInput);
+    taskInput.append(theInput);
 
-	taskInput.addEventListener("submit", (event) => {
-		event.preventDefault();
-		let task = createTask(event.target.children[0], false, board.id);
-		board.append(task);
-		event.target.children[0].value = "";
-	});
+    taskInput.addEventListener("submit", (event) => {
+        event.preventDefault();
+        let task = createTask(event.target.children[0], false, board.id);
+        board.append(task);
+        event.target.children[0].value = "";
+    });
 
-	board.append(taskInput);
-	boardBox.append(board);
+    board.append(taskInput);
+    boardBox.append(board);
 }
 
 function createTask(taskInput, isFromDatabase, boardId) {
-	let taskFrame = document.createElement("div");
-	taskFrame.setAttribute("class", "taskFrame");
-	taskFrame.setAttribute("id", taskInput.id);
-	taskFrame.setAttribute("draggable", "true");
+    let taskFrame = document.createElement("div");
+    taskFrame.setAttribute("class", "taskFrame");
+    taskFrame.setAttribute("id", taskInput.id);
+    taskFrame.setAttribute("draggable", "true");
 
-	taskFrame.addEventListener("dragstart", (event) => {
-		taskFrame.classList.add("movedElement"); // adding a class "dragableElement" into the taskFrame element
-		boardIdFrom = event.target.parentElement.id;
-		console.log(boardIdFrom);
-	})
+    taskFrame.addEventListener("dragstart", (event) => {
+        taskFrame.classList.add("movedElement"); // adding a class "dragableElement" into the taskFrame element
+        boardIdFrom = event.target.parentElement.id;
+    })
 
-	taskFrame.addEventListener("dragend", (event) => {
-		taskFrame.classList.remove("movedElement");
+    taskFrame.addEventListener("dragend", (event) => {
+        taskFrame.classList.remove("movedElement");
 
-		patch(boardIdFrom, event.target.id, event.target.parentElement.id);
-	})
+        patch(boardIdFrom, event.target.id, event.target.parentElement.id);
+    })
 
-	let deleteButton = document.createElement("button");
-	deleteButton.setAttribute("class", "deleteButton");
+    let deleteButton = document.createElement("button");
+    deleteButton.setAttribute("class", "deleteButton");
 
-	deleteButton.addEventListener("click", (event) => {
-		deleteTask(event.target.parentElement.parentElement, taskFrame);
-	});
+    deleteButton.addEventListener("click", (event) => {
+        deleteTask(event.target.parentElement.parentElement, taskFrame);
+    });
 
-	let taskText = document.createElement("p");
-	taskText.setAttribute("class", "taskInputText");
+    let taskText = document.createElement("p");
+    taskText.setAttribute("class", "taskInputText");
 
-	// FROM CLIENT
-	if (!isFromDatabase) {
-		console.log(boardId);
-		taskText.innerHTML = taskInput.value;
-		taskFrame.appendChild(taskText);
-		taskFrame.append(deleteButton);
-		postTask(taskInput, boardId, taskFrame);
-		return taskFrame;
-	}
-	// FROM DATABASE
-	else {
-		let boardList = document.getElementById("boardFrame").childNodes;
-		for (var i = 0; i < boardList.length; i++) {
-			if (boardList[i].id == boardId) {
-				taskText.innerHTML = taskInput.taskName;
-				taskFrame.appendChild(taskText);
-				boardList[i].append(taskFrame);
-				taskFrame.append(deleteButton);
-				return null;
-			}
-		}
-	}
+    // FROM CLIENT
+    if (!isFromDatabase) {
+        taskText.innerHTML = taskInput.value;
+        taskFrame.appendChild(taskText);
+        taskFrame.append(deleteButton);
+        postTask(taskInput, boardId, taskFrame);
+        return taskFrame;
+    }
+    // FROM DATABASE
+    else {
+        let boardList = document.getElementById("boardFrame").childNodes;
+        for (var i = 0; i < boardList.length; i++) {
+            if (boardList[i].id == boardId) {
+                taskText.innerHTML = taskInput.taskName;
+                taskFrame.appendChild(taskText);
+                boardList[i].append(taskFrame);
+                taskFrame.append(deleteButton);
+                return null;
+            }
+        }
+    }
 }
 
 
 // ******** GET, POST, DELETE and PATCH FUCNTIONS ******** //
 
 function getTask(boardId) {
-	axios.get(link + boardId + "/tasks")
-		.then(response => {
-			for (task of response.data) {
-				createTask(task, true, boardId);
-			}
-		})
-		.catch(error => {
-			console.log(error);
-		})
+    axios.get(link + boardId + "/tasks")
+        .then(response => {
+            for (task of response.data) {
+                createTask(task, true, boardId);
+            }
+        })
+        .catch(error => {
+            console.log(error);
+        })
 }
 
 function postBoard(boardObject, boardElement) {
 
-	axios.post(link, {
-			name: boardObject.value,
-			description: ""
-		})
-		.then((response) => {
-			console.log("Board Created");
-			boardElement.setAttribute("id", response.data.id);
-		})
-		.catch((error) => console.log(error))
+    axios.post(link, {
+            name: boardObject.value,
+            description: ""
+        })
+        .then((response) => {
+            boardElement.setAttribute("id", response.data.id);
+        })
+        .catch((error) => console.log(error))
 }
 
 function postTask(inputElement, boardId, taskElem) {
 
-	axios.post(link + boardId + '/tasks', {
-			taskName: inputElement.value,
-		})
-		.then((response) => {
-			console.log(taskElem);
-			taskElem.setAttribute("id", response.data.id);
+    axios.post(link + boardId + '/tasks', {
+            taskName: inputElement.value,
+        })
+        .then((response) => {
+            taskElem.setAttribute("id", response.data.id);
 
-		})
-		.catch((error) => {
-			console.log(error)
-		})
+        })
+        .catch((error) => {
+            console.log(error)
+        })
 }
 
 function deleteBoard(board) {
-	console.log(board.id);
-	axios.delete(link + board.id, {})
-		.then((response) => {
-			console.log("Deleating board works");
-			board.remove();
-		})
-		.catch((error) => {
+    axios.delete(link + board.id, {})
+        .then((response) => {
+            board.remove();
+        })
+        .catch((error) => {
             // THE ERROR IS EXECUTED WHEN THE BOARD CONTAINS TASKS
             // SO AT FIRST, THE TASKS ARE REMOVED AND THEN THE BOARD IS REMOVED
-            for (var i = 0; i < board.childElementCount; i++){
-                if (board.childNodes[i].className = "taskFrame") deleteTask(board,board.childNodes[i]);
+            for (var i = 0; i < board.childElementCount; i++) {
+                if (board.childNodes[i].className == "taskFrame"){
+                    deleteTask(board, board.childNodes[i]);
+                } 
             }
             deleteBoard(board);
-		})
+        })
 }
 
 function deleteTask(board, task) {
-	console.log(task.id);
-	axios.delete(link + board.id + "/tasks/" + task.id, {}).then((response) => {
-		console.log("deleting task successful");
-		task.remove();
+    axios.delete(link + board.id + "/tasks/" + task.id, {})
+    .then((response) => {
+        task.remove();
 
-	}).catch((error) => {
-		console.log(error)
-	});
+    }).catch((error) => {
+        console.log(error)
+    });
 }
 
 function patch(boardId, taskId, newBoardId) {
-	axios.patch(link + boardId + "/tasks/" + taskId, {
-			boardId: newBoardId,
-		})
-		.then((response) => {
-			console.log("Task moved!");
-		})
-		.catch((error) => {
-			console.log(error);
-		})
+    axios.patch(link + boardId + "/tasks/" + taskId, {
+            boardId: newBoardId,
+        })
+        .then((response) => {
+        })
+        .catch((error) => {
+            console.log(error);
+        })
 }
