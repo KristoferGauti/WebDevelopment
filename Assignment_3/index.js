@@ -1,7 +1,13 @@
 /*
     TODO 
-    Change the date on cards to be the date today
-    update 
+    Change the date on cards to be the current date today
+    Maybe check on returning no tasks array in the board response
+    The request for create a board, if successful, shall return the new board (all attributes, including id and tasks array).
+    ERROR try catch in every single HTTP requests (response.status(X) where X is a status code)
+    
+    Update board
+    Delete all boards
+    Partially update a task for a board 
 */
 
 
@@ -122,7 +128,6 @@ app.get("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
             responseTask = tasks[i]
         }
     }
-   
     response.status(200).send(responseTask);
 });
 
@@ -171,16 +176,19 @@ app.delete("/api/v1/boards/:id", (request, response) => {
         }
         response.status(200).send(responseBoard);
     }
+    response.status(404).send()
 });
 
 app.patch("/api/v1/boards/:id/tasks/:id", (request,response) => {
-    console.log("Executed!")
+    let responseTask;
     for (let i = 0; i < tasks.length; i++){
         if (parseInt(tasks[i].id) == parseInt(request.params.id)){
             tasks[i].archived = true;
+            responseTask = tasks[i]
+            break
         }
     }
-    response.send(tasks);
+    response.send(responseTask);
 })
 
 
