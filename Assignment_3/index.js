@@ -4,8 +4,6 @@
     Maybe check on returning no tasks array in the board response
     The request for create a board, if successful, shall return the new board (all attributes, including id and tasks array).
     ERROR try catch in every single HTTP requests (response.status(X) where X is a status code)
-    
-    Partially update a task for a board 
 */
 
 
@@ -51,7 +49,6 @@ var tasks = [
 ];
 
 // ############# HELPER FUNCTIONS #############
-
 function getData(arr, id) {
     let data;
     for (let i = 0; i <= arr.length-1; i++) {
@@ -87,9 +84,8 @@ function generateId(arr) {
 }
 
 // ############# ENDPOINTS #############
-
 /*
- * WHUT THE FUCK IS THAT???
+ * An endpoint to a favicon icon so we dont get a favicon error
  */
 app.get('/favico.ico', (req, res) => {
     res.sendFile(path.join(__dirname, "modSolutionA2", "/favicon.ico"));
@@ -231,23 +227,52 @@ app.delete("/api/v1/boards", (request, response) => {
 });
 
 /*
- * Update a task (tid) on a board (bid)
+ * Update a task (tid) attributes 
+ * taskName, archived and/or boardId on a board (bid)
  */
 app.patch("/api/v1/boards/:bid/tasks/:tid", (request,response) => {
-    let newtask;
-
+    let appendBoardIdBoolean = false;
+    let newTask;
     for (let i = 0; i < tasks.length; i++){
         if (parseInt(tasks[i].id) == parseInt(request.params.tid)){
-            newtask = getData(tasks,tasks[i].id);
-            newtask.taskName = request.body.taskName;
-            newtask.boardId = request.body.boardId;
-            newtask.archived = request.body.archived;
+            newTask = getData(tasks,tasks[i].id);
+            if (request.body.hasOwnProperty("boardId")) {
+                appendBoardIdBoolean = true;
+                newTask.boardId = request.body.boardId;
+            }
+            if (request.body.hasOwnProperty("taskName")) {
+                newTask.taskName = request.body.taskName;
+            }
+            if (request.body.hasOwnProperty("archived")) {
+                newTask.archived = request.body.archived;
+            }
         }
+    } 
+
+    /*
+    if the boardId is changed we need to modify the 
+    tasks array in the board objects 
+    */   
+    if (appendBoardIdBoolean) {
+        let oldBoardId = request.params.bid;
+        let taskId = request.params.tid;
+        for (board of boards) {
+            if (board.tasks.includes(taskId)) {
+                let dropBoard = getData(boards, request.body.boardId);
+                let index = board.tasks.indexOf(taskId);
+                board.tasks.splice(index, 1);
+                dropBoard.tasks.push(taskId);
+            }
+            //console.log(board.tasks)
+        }
+        //console.log("\n")
     }
-    response.send(newtask);
+    response.status(200).send(newTask);
 });
 
-//Start the server
+/**
+ * Starts the server
+ */
 app.listen(port, () => {
     console.log(`Event app listening on port: ${port}`);
 });
