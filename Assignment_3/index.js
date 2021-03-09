@@ -36,16 +36,55 @@ app.use(cors());
 
 //The following is an example of an array of three boards. 
 var boards = [
-    { id: '0', name: "Planned", description: "Everything that's on the todo list.", tasks: ["0","1","2"] },
-    { id: '1', name: "Ongoing", description: "Currently in progress.", tasks: [] },
-    { id: '3', name: "Done", description: "Completed tasks.", tasks: ["3"] }
+    { 
+        "id": '0',
+        "name": "Planned", 
+        "description": "Everything that's on the todo list.", 
+        "tasks": ["0","1","2"] 
+    },
+    { 
+        "id": '1', 
+        "name": "Ongoing", 
+        "description": "Currently in progress.", 
+        "tasks": [] 
+    },
+    { 
+        "id": '3', 
+        "name": "Done", 
+        "description": "Completed tasks.", 
+        "tasks": ["3"] 
+    }
 ];
 
 var tasks = [
-    { id: '0', boardId: '0', taskName: "Another task", dateCreated: new Date(Date.UTC(2021, 00, 21, 15, 48)), archived: false },
-    { id: '1', boardId: '0', taskName: "Prepare exam draft", dateCreated: new Date(Date.UTC(2021, 00, 21, 16, 48)), archived: false },
-    { id: '2', boardId: '0', taskName: "Discuss exam organisation", dateCreated: new Date(Date.UTC(2021, 00, 21, 14, 48)), archived: false },
-    { id: '3', boardId: '3', taskName: "Prepare assignment 2", dateCreated: new Date(Date.UTC(2021, 00, 10, 16, 00)), archived: true }
+    { 
+        "id": '0', 
+        "boardId": '0', 
+        "taskName": "Another task", 
+        "dateCreated": new Date().toISOString(), 
+        "archived": false 
+    },
+    { 
+        "id": '1', 
+        "boardId": '0', 
+        "taskName": "Prepare exam draft", 
+        "dateCreated": new Date().toISOString(), 
+        "archived": false 
+    },
+    {
+        "id": '2', 
+        "boardId": '0', 
+        "taskName": "Discuss exam organisation", 
+        "dateCreated": new Date().toISOString(),
+        "archived": false 
+    },
+    { 
+        "id": '3', 
+        "boardId": '3', 
+        "taskName": "Prepare assignment 2", 
+        "dateCreated": new Date().toISOString(), 
+        "archived": true 
+    }
 ];
 
 // ############# HELPER FUNCTIONS #############
@@ -156,16 +195,16 @@ app.get("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
 app.post("/api/v1/boards/:id/tasks", (request, response) => {
     newTaskId = generateId(tasks)
     const responseTask = {
-        id: String(newTaskId), 
-        boardId: request.params.id, 
-        taskName: request.body.taskName, 
-        dateCreated: new Date(Date.UTC(2021, 00, 21, 15, 48)), 
-        archived: false
+        "id": String(newTaskId), 
+        "boardId": request.params.id, 
+        "taskName": request.body.taskName, 
+        "dateCreated": new Date().toISOString(), 
+        "archived": false
     }
     tasks.push(responseTask);
     let theBoard = getData(boards, responseTask.boardId)
     theBoard.tasks.push(responseTask.id)
-    response.status(200).send(responseTask)
+    response.status(201).send(responseTask)
 });
 
 /*
@@ -174,13 +213,13 @@ app.post("/api/v1/boards/:id/tasks", (request, response) => {
 app.post("/api/v1/boards", (request, response) => {
     let newBoardId = generateId(boards);
     const responseBoard = {
-        id: newBoardId, 
-        name: request.body.name, 
-        description: "", 
-        tasks: [] 
+        "id": newBoardId, 
+        "name": request.body.name, 
+        "description": "", 
+        "tasks": [] 
     }
     boards.push(responseBoard);
-    response.status(200).send(responseBoard);
+    response.status(201).send(responseBoard);
 });
 
 app.put("/api/v1/boards/:id", (request, response) => {
@@ -254,7 +293,6 @@ app.patch("/api/v1/boards/:bid/tasks/:tid", (request,response) => {
     tasks array in the board objects 
     */   
     if (appendBoardIdBoolean) {
-        let oldBoardId = request.params.bid;
         let taskId = request.params.tid;
         for (board of boards) {
             if (board.tasks.includes(taskId)) {
