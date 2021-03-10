@@ -1,10 +1,3 @@
-/*
-    TODO 
-    The request for create a board, if successful, shall return the new board (all attributes, including id and tasks array).
-    ERROR try catch in every single HTTP requests (response.status(X) where X is a status code)
-*/
-
-
 //required modules
 const express = require('express');
 const path = require("path");
@@ -121,7 +114,6 @@ function generateId(arr) {
 }
 
 function validTaskRequest(request){
-
     if (request.body.hasOwnProperty("taskName")) 
     {
         if ((typeof request.body.taskName !== 'string'))return false;
@@ -136,7 +128,6 @@ function validTaskRequest(request){
 }
 
 function validBoardRequest(request){
-
     if (request.body.hasOwnProperty("name")) 
     {
         if ((typeof request.body.name !== 'string') ||
@@ -240,8 +231,7 @@ app.get("/api/v1/boards/:id/tasks", (request, response) => {
  *  Load task (tid) to a board (bid)
  */
 app.get("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
-    bdata = getData(boards,request.params.bid);
-
+    bdata = getData(boards, request.params.bid);
     if (bdata){
         let responseTask;
         for (board of boards) {
@@ -302,19 +292,22 @@ app.post("/api/v1/boards", (request, response) => {
 });
 
 app.put("/api/v1/boards/:id", (request, response) => {
-    if (!boardContainsTasks(request.params.id)) {
+    if ((Object.keys(request.body).length <= 1) || (!validBoardRequest(request))) 
+        response.status(400).send("The request is invalid");
+    else if (!boardContainsTasks(request.params.id)) {
         let updatedBoard = getData(boards, request.params.id);
         updatedBoard.name = request.body.name;
         updatedBoard.description = request.body.description;
         response.status(200).send(updatedBoard);
     }
-    else response.status(404).send("Tasks, on this board are not archived");
+    else response.status(404).send("The tasks, on this board, are not archived");
 });
 
 /*
  * Delete a board (id)
  */
 app.delete("/api/v1/boards/:id", (request, response) => {
+    //check if status codes works from this function to the patch funciton
     let responseBoard;
     if (!boardContainsTasks(request.params.id)) {
         for (let i = 0; i <= boards.length-1; i++) {
