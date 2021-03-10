@@ -328,14 +328,16 @@ app.patch("/api/v1/boards/:bid/tasks/:tid", (request,response) => {
         let taskId = request.params.tid;
         for (board of boards) {
             if (board.tasks.includes(taskId)) {
-                let dropBoard = getData(boards, request.body.boardId);
                 let index = board.tasks.indexOf(taskId);
                 board.tasks.splice(index, 1);
-                dropBoard.tasks.push(taskId);
             }
-            //console.log(board.tasks)
         }
-        //console.log("\n")
+        for (board of boards) {
+            if (board.id == request.body.boardId) {
+                board.tasks.push(taskId);
+            }
+            console.log(board.tasks)
+        }
     }
     response.status(200).send(newTask);
 });

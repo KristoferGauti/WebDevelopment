@@ -190,7 +190,6 @@ function archiveTask(event) {
   //Perform an AJAX PATCH request to the url
   axios.patch(url, { archived: true })
     .then(function (response) {
-      console.log("Success");
       card.parentElement.removeChild(card);
     })
     .catch(function (error) {
