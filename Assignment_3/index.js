@@ -1,7 +1,5 @@
 /*
     TODO 
-    Change the date on cards to be the current date today
-    Maybe check on returning no tasks array in the board response
     The request for create a board, if successful, shall return the new board (all attributes, including id and tasks array).
     ERROR try catch in every single HTTP requests (response.status(X) where X is a status code)
 */
@@ -141,7 +139,17 @@ app.get("/", (request, resonse) => {
  * Get all boards
  */
 app.get("/api/v1/boards", (request, response) => {
+    let taskIds = [];
+    for (board of boards) {
+        taskIds.push(board.tasks);
+        delete board["tasks"];
+    }
+
     response.status(200).send(boards);
+
+    for (let i = 0; i <= boards.length-1; i++) {
+        boards[i]["tasks"] = taskIds[i]
+    }
 });
 
 /*
@@ -168,6 +176,27 @@ app.get("/api/v1/boards/:id/tasks", (request, response) => {
             if (task.id == taskId) responseTasks.push(task)
         }
     }
+
+    if (request.body.hasOwnProperty("sort")) {
+        if (request.body["sort"] == "id")
+            responseTasks.sort((task1, task2) => {
+                if (task1.id > task2.id) return 1;
+                else return -1;
+            });
+        else if (request.body["sort"] == "taskName") {
+            responseTasks.sort((task1, task2) => {
+                if (task1.taskName > task2.taskName) return 1;
+                else return -1;
+            });
+        }
+        else {
+            responseTasks.sort((task1, task2) => {
+                if (task1.dateCreated > task2.dateCreated) return 1;
+                else return -1;
+            });
+        }
+    }
+
     response.status(200).send(responseTasks);
 });
 
@@ -215,7 +244,7 @@ app.post("/api/v1/boards", (request, response) => {
     const responseBoard = {
         "id": newBoardId, 
         "name": request.body.name, 
-        "description": "", 
+        "description": request.body.description, 
         "tasks": [] 
     }
     boards.push(responseBoard);
@@ -223,10 +252,13 @@ app.post("/api/v1/boards", (request, response) => {
 });
 
 app.put("/api/v1/boards/:id", (request, response) => {
-    let updatedBoard = getData(boards, request.params.id);
-    updatedBoard.name = request.body.name;
-    updatedBoard.description = request.body.description;
-    response.status(200).send(updatedBoard);
+    if (!boardContainsTasks(request.params.id)) {
+        let updatedBoard = getData(boards, request.params.id);
+        updatedBoard.name = request.body.name;
+        updatedBoard.description = request.body.description;
+        response.status(200).send(updatedBoard);
+    }
+    else response.status(404).send();
 });
 
 /*
@@ -243,7 +275,7 @@ app.delete("/api/v1/boards/:id", (request, response) => {
         }
         response.status(200).send(responseBoard);
     }
-    response.status(404).send()
+    else response.status(404).send();
 });
 
 /*
