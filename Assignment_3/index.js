@@ -120,6 +120,38 @@ function generateId(arr) {
     return newId
 }
 
+function validTaskRequest(request){
+
+    if (request.body.hasOwnProperty("taskName")) 
+    {
+        if ((typeof request.body.taskName !== 'string'))return false;
+    }
+    if (request.body.hasOwnProperty("archived"))
+    {
+        if (typeof request.body.archived !== 'boolean') return false;
+    }
+    if (Object.keys(request.body).length == 0) return false;
+
+    return true;
+}
+
+function validBoardRequest(request){
+
+    if (request.body.hasOwnProperty("name")) 
+    {
+        if ((typeof request.body.name !== 'string') ||
+            (request.body.name == ""))
+            return false;
+    }
+    if (request.body.hasOwnProperty("description"))
+    {
+        if (typeof request.body.description !== 'string') return false;
+    }
+    if (Object.keys(request.body).length == 0) return false;
+    return true;
+}
+
+
 // ############# ENDPOINTS #############
 /*
  * An endpoint to a favicon icon so we dont get a favicon error
@@ -157,98 +189,116 @@ app.get("/api/v1/boards", (request, response) => {
  */
 app.get("/api/v1/boards/:id", (request, response) => {
     let responseBoard = getData(boards, request.params.id);
-    response.status(200).send(responseBoard);
+    if (responseBoard) response.status(200).send(responseBoard);
+    else response.status(404).send("Board does not exist");
 });
 
 /*
  * Get all tasks from a board (id)
  */
 app.get("/api/v1/boards/:id/tasks", (request, response) => {
-    let responseTasks = [];
-    let taskIds;
-    for (board of boards) {
-        if (board.id == request.params.id) {
-            taskIds = board.tasks
+    if(getData(boards, request.params.id)){
+        let responseTasks = [];
+        let taskIds;
+        for (board of boards) {
+            if (board.id == request.params.id) {
+                taskIds = board.tasks
+            }
         }
-    }
-    for (task of tasks) {
-        for (taskId of taskIds) {
-            if (task.id == taskId) responseTasks.push(task)
+        for (task of tasks) {
+            for (taskId of taskIds) {
+                if (task.id == taskId) responseTasks.push(task)
+            }
         }
-    }
 
-    if (request.body.hasOwnProperty("sort")) {
-        if (request.body["sort"] == "id")
-            responseTasks.sort((task1, task2) => {
-                if (task1.id > task2.id) return 1;
-                else return -1;
-            });
-        else if (request.body["sort"] == "taskName") {
-            responseTasks.sort((task1, task2) => {
-                if (task1.taskName > task2.taskName) return 1;
-                else return -1;
-            });
+        if (request.body.hasOwnProperty("sort")) {
+            if (request.body["sort"] == "id")
+                responseTasks.sort((task1, task2) => {
+                    if (task1.id > task2.id) return 1;
+                    else return -1;
+                });
+            else if (request.body["sort"] == "taskName") {
+                responseTasks.sort((task1, task2) => {
+                    if (task1.taskName > task2.taskName) return 1;
+                    else return -1;
+                });
+            }
+            else {
+                responseTasks.sort((task1, task2) => {
+                    if (task1.dateCreated > task2.dateCreated) return 1;
+                    else return -1;
+                });
+            }
         }
-        else {
-            responseTasks.sort((task1, task2) => {
-                if (task1.dateCreated > task2.dateCreated) return 1;
-                else return -1;
-            });
-        }
-    }
 
-    response.status(200).send(responseTasks);
+        response.status(200).send(responseTasks);
+    }
+    else response.status(404).send("Board does not exist");
 });
 
 /*
  *  Load task (tid) to a board (bid)
  */
 app.get("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
-    let responseTask;
-    for (board of boards) {
-        if (board.id == request.params.bid) {
-            for (task of tasks) {
-                if (task.id == request.params.tid && 
-                    board.tasks.includes(request.params.tid)) {
-                    responseTask = task
+    bdata = getData(boards,request.params.bid);
+
+    if (bdata){
+        let responseTask;
+        for (board of boards) {
+            if (board.id == request.params.bid) {
+                if(board.tasks.includes(request.params.tid)){
+                    for (task of tasks) {
+                        if (task.id == request.params.tid && 
+                            board.tasks.includes(request.params.tid)) {
+                            responseTask = task
+                        }
+                    }
                 }
+                else response.status(404).send("Task does not exist");
             }
         }
+        response.status(200).send(responseTask)
     }
-    response.status(200).send(responseTask)
+    else response.status(404).send("Board does not exist");
 });
 
 /*
  * Create a new task to a board (id)
  */
 app.post("/api/v1/boards/:id/tasks", (request, response) => {
-    newTaskId = generateId(tasks)
-    const responseTask = {
-        "id": String(newTaskId), 
-        "boardId": request.params.id, 
-        "taskName": request.body.taskName, 
-        "dateCreated": new Date().toISOString(), 
-        "archived": false
+    if (validTaskRequest(request)){
+        newTaskId = generateId(tasks)
+        const responseTask = {
+            "id": String(newTaskId), 
+            "boardId": request.params.id, 
+            "taskName": request.body.taskName, 
+            "dateCreated": new Date().toISOString(), 
+            "archived": false
+        }
+        tasks.push(responseTask);
+        let theBoard = getData(boards, responseTask.boardId)
+        theBoard.tasks.push(responseTask.id)
+        response.status(201).send(responseTask)
     }
-    tasks.push(responseTask);
-    let theBoard = getData(boards, responseTask.boardId)
-    theBoard.tasks.push(responseTask.id)
-    response.status(201).send(responseTask)
+    else response.status(400).send("Invalid attribute value type");
 });
 
 /*
  * Create a board, with a generated id
  */
 app.post("/api/v1/boards", (request, response) => {
-    let newBoardId = generateId(boards);
-    const responseBoard = {
-        "id": newBoardId, 
-        "name": request.body.name, 
-        "description": request.body.description, 
-        "tasks": [] 
+    if (validBoardRequest(request)){
+        let newBoardId = generateId(boards);
+        const responseBoard = {
+            "id": newBoardId, 
+            "name": request.body.name, 
+            "description": request.body.description, 
+            "tasks": [] 
+        }
+        boards.push(responseBoard);
+        response.status(201).send(responseBoard);
     }
-    boards.push(responseBoard);
-    response.status(201).send(responseBoard);
+    else response.status(400).send("Invalid attribute value type");
 });
 
 app.put("/api/v1/boards/:id", (request, response) => {
@@ -258,7 +308,7 @@ app.put("/api/v1/boards/:id", (request, response) => {
         updatedBoard.description = request.body.description;
         response.status(200).send(updatedBoard);
     }
-    else response.status(404).send();
+    else response.status(404).send("Tasks, on this board are not archived");
 });
 
 /*
@@ -275,7 +325,7 @@ app.delete("/api/v1/boards/:id", (request, response) => {
         }
         response.status(200).send(responseBoard);
     }
-    else response.status(404).send();
+    else response.status(404).send("Board contains tasks");
 });
 
 /*
@@ -297,6 +347,8 @@ app.delete("/api/v1/boards", (request, response) => {
     response.status(200).send(deletedItems);
 });
 
+
+
 /*
  * Update a task (tid) attributes 
  * taskName, archived and/or boardId on a board (bid)
@@ -304,43 +356,49 @@ app.delete("/api/v1/boards", (request, response) => {
 app.patch("/api/v1/boards/:bid/tasks/:tid", (request,response) => {
     let appendBoardIdBoolean = false;
     let newTask;
-    for (let i = 0; i < tasks.length; i++){
-        if (parseInt(tasks[i].id) == parseInt(request.params.tid)){
-            newTask = getData(tasks,tasks[i].id);
-            if (request.body.hasOwnProperty("boardId")) {
-                appendBoardIdBoolean = true;
-                newTask.boardId = request.body.boardId;
+    if (validTaskRequest(request)){
+        for (let i = 0; i < tasks.length; i++){
+            if (parseInt(tasks[i].id) == parseInt(request.params.tid)){
+                newTask = getData(tasks,tasks[i].id);
+                if (request.body.hasOwnProperty("boardId")) {
+                    appendBoardIdBoolean = true;
+                    newTask.boardId = request.body.boardId;
+                }
+                if (request.body.hasOwnProperty("taskName")) {
+                    newTask.taskName = request.body.taskName;
+                }
+                if (request.body.hasOwnProperty("archived")) {
+                    newTask.archived = request.body.archived;
+                }
             }
-            if (request.body.hasOwnProperty("taskName")) {
-                newTask.taskName = request.body.taskName;
-            }
-            if (request.body.hasOwnProperty("archived")) {
-                newTask.archived = request.body.archived;
-            }
-        }
-    } 
+        } 
 
-    /*
-    if the boardId is changed we need to modify the 
-    tasks array in the board objects 
-    */   
-    if (appendBoardIdBoolean) {
-        let taskId = request.params.tid;
-        for (board of boards) {
-            if (board.tasks.includes(taskId)) {
-                let index = board.tasks.indexOf(taskId);
-                board.tasks.splice(index, 1);
+        /*
+        if the boardId is changed we need to modify the 
+        tasks array in the board objects 
+        */   
+        if (appendBoardIdBoolean) {
+            let taskId = request.params.tid;
+            for (board of boards) {
+                if (board.tasks.includes(taskId)) {
+                    let index = board.tasks.indexOf(taskId);
+                    board.tasks.splice(index, 1);
+                }
+            }
+            for (board of boards) {
+                if (board.id == request.body.boardId) {
+                    board.tasks.push(taskId);
+                }
             }
         }
-        for (board of boards) {
-            if (board.id == request.body.boardId) {
-                board.tasks.push(taskId);
-            }
-            console.log(board.tasks)
-        }
-    }
-    response.status(200).send(newTask);
+        response.status(200).send(newTask);
+}
+    else response.status(400).send("Invalid attribute value type");
 });
+
+app.use("*",(request,response)=>{
+    response.status(405).send("Invalid HTTP request");
+})
 
 /**
  * Starts the server
