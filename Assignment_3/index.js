@@ -354,12 +354,10 @@ app.delete("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
             for (task of tasks) {
                 if (task.boardId == request.params.bid) {
                     if (task.id == request.params.tid) {
-                        console.log(task.id, request.params.tid)
                         let taskIndex = board.tasks.indexOf(task.id);
                         deletedTask = tasks.splice(taskIndex, 1);
                         board.tasks.splice(taskIndex, 1);
                         sendResponse = true;
-                        console.log(outOfBoundsBoard, outOfBoundsTask, sendResponse);
                         break;
                     }
                 }
