@@ -137,7 +137,7 @@ function validBoardRequest(request){
     {
         if (typeof request.body.description !== 'string') return false;
     }
-    if (Object.keys(request.body).length == 0) return false;
+    if (Object.keys(request.body).length < 2) return false;
     return true;
 }
 
