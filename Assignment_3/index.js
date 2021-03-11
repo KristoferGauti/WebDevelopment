@@ -373,15 +373,14 @@ app.delete("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
  */
 app.patch("/api/v1/boards/:bid/tasks/:tid", (request,response) => {
     let appendBoardIdBoolean = false;
-    let outOfBounceBoard = false;
-    let outOfBounceTask = false;
+    let outOfBoundsBoard = false;
+    let outOfBoundsTask = false;
     let newTask;
 
-    if (!getData(boards, request.params.bid)) outOfBounceBoard = true;
-    else if (!getData(tasks, request.params.tid)) outOfBounceTask = true;
+    if (!getData(boards, request.params.bid)) outOfBoundsBoard = true;
+    else if (!getData(tasks, request.params.tid)) outOfBoundsTask = true;
 
-    if (validTaskRequest(request) && !outOfBounceBoard && !outOfBounceTask){
-        console.log("hello there")
+    if (validTaskRequest(request) && !outOfBoundsBoard && !outOfBoundsTask){
         for (let i = 0; i < tasks.length; i++){
             if (tasks[i].id == request.params.tid) {
                 newTask = getData(tasks,tasks[i].id);
@@ -419,8 +418,8 @@ app.patch("/api/v1/boards/:bid/tasks/:tid", (request,response) => {
         }
         response.status(200).send(newTask);
     }
-    else if (outOfBounceBoard) response.status(404).send("Board does not exist");
-    else if (outOfBounceTask) response.status(404).send("Task does not exist");
+    else if (outOfBoundsBoard) response.status(404).send("Board does not exist");
+    else if (outOfBoundsTask) response.status(404).send("Task does not exist");
     else response.status(400).send("Invalid attribute value type");
 });
 
