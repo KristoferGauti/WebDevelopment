@@ -343,6 +343,7 @@ app.delete("/api/v1/boards", (request, response) => {
 
 app.delete("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
     let deletedTask;
+    let sentResponse = false;
     for (board of boards) {
         if (board.id == request.params.bid) {
             for (task of tasks) {
@@ -351,20 +352,17 @@ app.delete("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
                     deletedTask = tasks.splice(taskIndex, 1);
                     board.tasks.splice(taskIndex, 1);
                     response.status(200).send(deletedTask);
+                    sentResponse = true;
                     break
                 }
-                else {
-                    response.status(404).send("Task does not exist");
-                    break;
-                }
             }
-            break;
-        }
-        else {
-            response.status(404).send("Board does not exist");
+            response.status(404).send("Task does not exist");
+            sentResponse = true;
             break;
         }
     }
+    if (!sentResponse) response.status(404).send("Board does not exist");
+    
 });
 
 /*
