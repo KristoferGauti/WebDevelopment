@@ -52,28 +52,28 @@ var tasks = [
         "id": '0', 
         "boardId": '0', 
         "taskName": "Another task", 
-        "dateCreated": new Date().toISOString(), 
+        "dateCreated": new Date().getTime(), 
         "archived": false 
     },
     { 
         "id": '1', 
         "boardId": '0', 
         "taskName": "Prepare exam draft", 
-        "dateCreated": new Date().toISOString(), 
+        "dateCreated": new Date().getTime(), 
         "archived": false 
     },
     {
         "id": '2', 
         "boardId": '0', 
         "taskName": "Discuss exam organisation", 
-        "dateCreated": new Date().toISOString(),
+        "dateCreated": new Date().getTime(),
         "archived": false 
     },
     { 
         "id": '3', 
         "boardId": '3', 
         "taskName": "Prepare assignment 2", 
-        "dateCreated": new Date().toISOString(), 
+        "dateCreated": new Date().getTime(), 
         "archived": true 
     }
 ];
@@ -154,7 +154,7 @@ app.get('/favico.ico', (req, res) => {
  * Display the home page
  */
 app.get("/", (request, resonse) => {
-    resonse.status(200).sendFile(staticFilesPath + "/solution.html");
+    resonse.status(200).send("Hello World!");
 });
 
 /*
@@ -261,7 +261,7 @@ app.post("/api/v1/boards/:id/tasks", (request, response) => {
             "id": String(newTaskId), 
             "boardId": String(request.params.id), 
             "taskName": request.body.taskName, 
-            "dateCreated": new Date().toISOString(), 
+            "dateCreated": new Date().getTime(), 
             "archived": false
         }
         tasks.push(responseTask);
