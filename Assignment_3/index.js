@@ -343,26 +343,34 @@ app.delete("/api/v1/boards", (request, response) => {
 
 app.delete("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
     let deletedTask;
-    let sentResponse = false;
-    for (board of boards) {
-        if (board.id == request.params.bid) {
+    let sendResponse = false;
+    let outOfBoundsBoard = false;
+    let outOfBoundsTask = false;
+    if (!getData(boards, request.params.bid)) outOfBoundsBoard = true;
+    else if (!getData(tasks, request.params.tid)) outOfBoundsTask = true;
+    
+    if (!outOfBoundsBoard && !outOfBoundsTask) {
+        for (board of boards) {
             for (task of tasks) {
-                if (task.id == request.params.tid) {
-                    let taskIndex = board.tasks.indexOf(task.id);
-                    deletedTask = tasks.splice(taskIndex, 1);
-                    board.tasks.splice(taskIndex, 1);
-                    response.status(200).send(deletedTask);
-                    sentResponse = true;
-                    break
+                if (task.boardId == request.params.bid) {
+                    if (task.id == request.params.tid) {
+                        console.log(task.id, request.params.tid)
+                        let taskIndex = board.tasks.indexOf(task.id);
+                        deletedTask = tasks.splice(taskIndex, 1);
+                        board.tasks.splice(taskIndex, 1);
+                        sendResponse = true;
+                        console.log(outOfBoundsBoard, outOfBoundsTask, sendResponse);
+                        break;
+                    }
                 }
             }
-            response.status(404).send("Task does not exist");
-            sentResponse = true;
+            if (!sendResponse) response.status(404).send("Task does not exist");
+            else response.status(200).send(deletedTask);
             break;
         }
     }
-    if (!sentResponse) response.status(404).send("Board does not exist");
-    
+    else if (outOfBoundsBoard) response.status(404).send("Board does not exist");
+    else if (outOfBoundsTask) response.status(404).send("Task does not exist");
 });
 
 /*
@@ -370,6 +378,7 @@ app.delete("/api/v1/boards/:bid/tasks/:tid", (request, response) => {
  * taskName, archived and/or boardId on a board (bid)
  */
 app.patch("/api/v1/boards/:bid/tasks/:tid", (request,response) => {
+    let sendResponse = false;
     let appendBoardIdBoolean = false;
     let outOfBoundsBoard = false;
     let outOfBoundsTask = false;
@@ -379,21 +388,23 @@ app.patch("/api/v1/boards/:bid/tasks/:tid", (request,response) => {
     else if (!getData(tasks, request.params.tid)) outOfBoundsTask = true;
 
     if (validTaskRequest(request) && !outOfBoundsBoard && !outOfBoundsTask){
-        for (let i = 0; i < tasks.length; i++){
-            if (tasks[i].id == request.params.tid) {
-                newTask = getData(tasks,tasks[i].id);
-                if (request.body.hasOwnProperty("boardId")) {
-                    appendBoardIdBoolean = true;
-                    newTask.boardId = String(request.body.boardId);
-                }
-                if (request.body.hasOwnProperty("taskName")) {
-                    newTask.taskName = request.body.taskName;
-                }
-                if (request.body.hasOwnProperty("archived")) {
-                    newTask.archived = request.body.archived;
+        for (let i = 0; i < tasks.length; i++) {
+            if(tasks[i].boardId == request.params.bid) {
+                if (tasks[i].id == request.params.tid) {
+                    sendResponse = true;
+                    newTask = getData(tasks,tasks[i].id);
+                    if (request.body.hasOwnProperty("boardId")) {
+                        appendBoardIdBoolean = true;
+                        newTask.boardId = String(request.body.boardId);
+                    }
+                    if (request.body.hasOwnProperty("taskName")) {
+                        newTask.taskName = request.body.taskName;
+                    }
+                    if (request.body.hasOwnProperty("archived")) {
+                        newTask.archived = request.body.archived;
+                    }
                 }
             }
-            
         } 
         
         /*
@@ -414,7 +425,8 @@ app.patch("/api/v1/boards/:bid/tasks/:tid", (request,response) => {
                 }
             }
         }
-        response.status(200).send(newTask);
+        if (sendResponse) response.status(200).send(newTask);
+        else response.status(404).send("Task does not exist");
     }
     else if (outOfBoundsBoard) response.status(404).send("Board does not exist");
     else if (outOfBoundsTask) response.status(404).send("Task does not exist");
