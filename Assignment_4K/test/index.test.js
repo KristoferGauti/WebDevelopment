@@ -7,7 +7,13 @@ let should = chai.should();
 let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
-let apiUrl = "http://localhost:3000";
+let apiUrl = "http://localhost:3000/api/v1";
+
+function rightResponseJSONStatus(res, statuscode, isArray=true) {
+    chai.expect(res).to.have.status(statuscode);
+    chai.expect(res).to.be.json;
+    if (isArray) chai.expect(res.body).to.be.a("array");
+}
 
 describe('Endpoint tests', () => {
     //###########################
@@ -24,12 +30,90 @@ describe('Endpoint tests', () => {
     //###########################
 
     // This test doesn't do much
-    it("Please remove me before handin - I don't do much", function (done) {
+    it("GET /boards ", (done) => {
         chai.request(apiUrl)
-            .get('/')
-            .end((err, res) => {
-                res.should.not.be.undefined;
-                done();
-            });
+        .get("/boards")
+        .end((err, res) => {
+            rightResponseJSONStatus(res, 200);
+            chai.expect(res.body.length).to.be.eql(2);
+            done();
+        });    
     });
+
+    it("GET /boards/:boardId", (done) => {
+        chai.request(apiUrl)
+        .get("/boards/0")
+        .end((err, res) => {
+            rightResponseJSONStatus(res, 200, false);
+            chai.expect(res.body).to.have.property("id").eql("0");
+            chai.expect(res.body).to.have.property("name").eql("Planned");
+            chai.expect(res.body).to.have.property("description").eql("My todo list.");
+            chai.expect(res.body).to.have.property("tasks").to.be.a("array");
+            chai.expect(res.body).to.have.property("tasks").that.does.include("0");
+            chai.expect(Object.keys(res.body).length).to.be.eql(4)
+            done();
+        });
+    }); 
+
+    it("GET /boards/:boardId/tasks", (done) => {
+        chai.request(apiUrl)
+        .get("/boards/0/tasks")
+        .end((err, res) => {
+            rightResponseJSONStatus(res, 200);
+            chai.expect(res.body.length).to.be.eql(1);
+            done();
+        });
+    });
+
+    it("GET /boards/:boardId/tasks/:taskId", (done) => {
+        chai.request(apiUrl)
+        .get("/boards/0/tasks/0")
+        .end((err, res) => {
+            rightResponseJSONStatus(res, 200, false)
+            chai.expect(res.body).to.have.property("id").eql("0");
+            chai.expect(res.body).to.have.property("boardId").eql("0");
+            chai.expect(res.body).to.have.property("taskName").eql("A task");
+            chai.expect(res.body).to.have.property("dateCreated").eql(1611244080000);
+            chai.expect(res.body).to.have.property("archived").eql(false);
+            chai.expect(Object.keys(res.body).length).to.be.eql(5);
+        });
+        done();
+    });
+
+    // it("POST /boards/:boardId", (done) => {
+    //     chai.request(apiUrl)
+    //     .get("/boards/5")
+    //     .end((err, res) => {
+            
+    //     });
+    //     done();
+    // });
+
+    // it("GET /boards/:boardId", (done) => {
+    //     chai.request(apiUrl)
+    //     .get("/boards/0")
+    //     .end((err, res) => {
+
+    //     });
+    //     done();
+    // });
+
+    // it("GET /boards/:boardId", (done) => {
+    //     chai.request(apiUrl)
+    //     .get("/boards/0")
+    //     .end((err, res) => {
+
+    //     });
+    //     done();
+    // });
+
+    // it("GET /boards/:boardId", (done) => {
+    //     chai.request(apiUrl)
+    //     .get("/boards/0")
+    //     .end((err, res) => {
+
+    //     });
+    //     done();
+    // });
+
 });
