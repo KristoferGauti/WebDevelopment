@@ -83,11 +83,14 @@ describe('Endpoint tests', () => {
     it("POST /boards/", (done) => {
         chai.request(apiUrl)
         .post("/boards")
+        .set("Content-type", "application/json")
+        .send({})
         .end((err, res) => {
             rightResponseJSONStatus(res, 400, false);
             chai.expect(res.body).to.have.property("message").eql(
                 "Boards require at least a name, and description."
             );
+            chai.expect(Object.keys(res.body).length).to.be.eql(1);
         });
         done();
     });
@@ -95,25 +98,19 @@ describe('Endpoint tests', () => {
     it("POST /boards/:boardId/tasks", (done) => {
         chai.request(apiUrl)
         .post("/boards/0/tasks")
+        .set("Content-type", "application/json")
+        .send({})
         .end((err, res) => {
             rightResponseJSONStatus(res, 400, false);
             chai.expect(res.body).to.have.property("message").eql(
                 "Tasks require a taskName in the request body."
             );
+            chai.expect(Object.keys(res.body).length).to.be.eql(1);
         });
         done();
     });
 
-    // it("PUT /boards/:boardId", (done) => {
-    //     chai.request(apiUrl)
-    //     .put("/boards/0")
-    //     .end((err, res) => {
-            
-    //     });
-    //     done();
-    // });
-
-    // it("DELETE /boards/:boardId", (done) => {
+    // it("POST /auth", (done) => {
     //     chai.request(apiUrl)
     //     .get("/boards/0")
     //     .end((err, res) => {
@@ -122,7 +119,22 @@ describe('Endpoint tests', () => {
     //     done();
     // });
 
-    // it("POST /auth", (done) => {
+    it("PUT /boards/:boardId", (done) => {
+        chai.request(apiUrl)
+        .put("/boards/1")
+        .set("Content-type", "application/json")
+        .send({"name": "test name"})
+        .end((err, res) => {
+            rightResponseJSONStatus(res, 400, false);
+            chai.expect(res.body).to.have.property("message").eql(
+                "To update a board, all attributes are needed (name and description)."
+            );
+            chai.expect(Object.keys(res.body).length).to.be.eql(1);
+        });
+        done();
+    });
+
+    // it("DELETE /boards/:boardId", (done) => {
     //     chai.request(apiUrl)
     //     .get("/boards/0")
     //     .end((err, res) => {
