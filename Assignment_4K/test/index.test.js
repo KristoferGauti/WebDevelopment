@@ -80,16 +80,40 @@ describe('Endpoint tests', () => {
         done();
     });
 
-    // it("POST /boards/:boardId", (done) => {
+    it("POST /boards/", (done) => {
+        chai.request(apiUrl)
+        .post("/boards")
+        .end((err, res) => {
+            rightResponseJSONStatus(res, 400, false);
+            chai.expect(res.body).to.have.property("message").eql(
+                "Boards require at least a name, and description."
+            );
+        });
+        done();
+    });
+
+    it("POST /boards/:boardId/tasks", (done) => {
+        chai.request(apiUrl)
+        .post("/boards/0/tasks")
+        .end((err, res) => {
+            rightResponseJSONStatus(res, 400, false);
+            chai.expect(res.body).to.have.property("message").eql(
+                "Tasks require a taskName in the request body."
+            );
+        });
+        done();
+    });
+
+    // it("PUT /boards/:boardId", (done) => {
     //     chai.request(apiUrl)
-    //     .get("/boards/5")
+    //     .put("/boards/0")
     //     .end((err, res) => {
             
     //     });
     //     done();
     // });
 
-    // it("GET /boards/:boardId", (done) => {
+    // it("DELETE /boards/:boardId", (done) => {
     //     chai.request(apiUrl)
     //     .get("/boards/0")
     //     .end((err, res) => {
@@ -98,16 +122,7 @@ describe('Endpoint tests', () => {
     //     done();
     // });
 
-    // it("GET /boards/:boardId", (done) => {
-    //     chai.request(apiUrl)
-    //     .get("/boards/0")
-    //     .end((err, res) => {
-
-    //     });
-    //     done();
-    // });
-
-    // it("GET /boards/:boardId", (done) => {
+    // it("POST /auth", (done) => {
     //     chai.request(apiUrl)
     //     .get("/boards/0")
     //     .end((err, res) => {
