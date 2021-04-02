@@ -8,12 +8,14 @@ let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
 let apiUrl = "http://localhost:3000/api/v1";
+const bearerToken = "cf13ea34d19f5e54f75b1f9ac630b9c320f1185204c6d3b164794086533766b0";
 
 
 function rightResponseJSONStatus(res, statuscode, isArray=true) {
     chai.expect(res).to.have.status(statuscode);
-    chai.expect(res).to.be.json;
+    chai.expect(res).to.be.json; 
     if (isArray) chai.expect(res.body).to.be.a("array");
+    else chai.expect(res.body).to.be.a("object");
 }
 
 describe('Endpoint tests', () => {
@@ -84,7 +86,6 @@ describe('Endpoint tests', () => {
     it("POST /boards/", (done) => {
         chai.request(apiUrl)
         .post("/boards")
-        .set("Content-type", "application/json")
         .send({
             "name": "test",
             "description": "description test"
@@ -102,7 +103,6 @@ describe('Endpoint tests', () => {
     it("POST /boards/:boardId/tasks", (done) => {
         chai.request(apiUrl)
         .post("/boards/0/tasks")
-        .set("Content-type", "application/json")
         .send({
             "taskName": "test"
         })
@@ -110,6 +110,7 @@ describe('Endpoint tests', () => {
             rightResponseJSONStatus(res, 201, false);
             chai.expect(res.body).to.have.property("taskName").eql("test");
             chai.expect(res.body).to.have.property("boardId").eql("0");
+            //check if boardId is either an integer or string ["0", 0]
             chai.expect(res.body).to.have.property("archived").eql(false);
             chai.expect(Object.keys(res.body).length).to.be.eql(5);
         });
@@ -119,7 +120,6 @@ describe('Endpoint tests', () => {
     it("PUT /boards/:boardId", (done) => {
         chai.request(apiUrl)
         .put("/boards/1")
-        .set("Content-type", "application/json")
         .send({
             "name": "update name",
             "description": "update description"
@@ -137,7 +137,6 @@ describe('Endpoint tests', () => {
     it("PUT /boards/:boardId", (done) => {
         chai.request(apiUrl)
         .put("/boards/1")
-        .set("Content-type", "application/json")
         .send({"name": "test name"})
         .end((err, res) => {
             rightResponseJSONStatus(res, 400, false);
@@ -149,13 +148,25 @@ describe('Endpoint tests', () => {
         done();
     });
 
-    // it("DELETE /boards/:boardId", (done) => {
-    //     chai.request(apiUrl)
-    //     .get("/boards/0")
-    //     .end((err, res) => {
-    //         //POST request to get the bearer token and set it to the header in this put request
-    //     });
-    //     done();
-    // });
+    //POST request to get the bearer token and set it to the header in this put request
+    it("DELETE /boards/:boardId", (done) => {
+        chai.request(apiUrl)
+        .post("/auth")
+        .auth("admin", "secret")
+        .end((err, res) => {
+            let token = res.body["token"][0]
+            chai.request(apiUrl)
+            .delete("/boards/1")
+            .set({"Authorization": `Bearer ${token}`})
+            .end((err, res) => {
+                rightResponseJSONStatus(res, 200);
+                chai.expect(res.body[0]).to.have.property("id").eql("1");
+                chai.expect(res.body[0]).to.have.property("name").eql("Ongoing");
+                chai.expect(res.body[0]).to.have.property("description").eql("Currently in progress.");
+                chai.expect(res.body[0]).to.have.property("tasks").to.be.a("object").to.be.empty;
+            });
+        });
+        done();
+    });
 
 });
