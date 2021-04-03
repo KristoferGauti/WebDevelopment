@@ -8,7 +8,6 @@ let chaiHttp = require('chai-http');
 chai.use(chaiHttp);
 
 let apiUrl = "http://localhost:3000/api/v1";
-const bearerToken = "cf13ea34d19f5e54f75b1f9ac630b9c320f1185204c6d3b164794086533766b0";
 
 
 function rightResponseJSONStatus(res, statuscode, isArray=true) {
@@ -54,6 +53,7 @@ describe('Endpoint tests', () => {
             chai.expect(res.body).to.have.property("tasks").to.be.a("array");
             chai.expect(res.body).to.have.property("tasks").that.does.include("0");
             chai.expect(Object.keys(res.body).length).to.be.eql(4)
+            chai.expect(res.body).to.have.keys("id","name","description","tasks")
             done();
         });
     }); 
@@ -79,6 +79,7 @@ describe('Endpoint tests', () => {
             chai.expect(res.body).to.have.property("dateCreated").eql(1611244080000);
             chai.expect(res.body).to.have.property("archived").eql(false);
             chai.expect(Object.keys(res.body).length).to.be.eql(5);
+            chai.expect(res.body).to.have.keys("id","boardId","taskName","dateCreated","archived")
         });
         done();
     });
@@ -96,6 +97,7 @@ describe('Endpoint tests', () => {
             chai.expect(res.body).to.have.property("description").eql("description test");
             chai.expect(res.body).to.have.property("tasks").to.be.empty;
             chai.expect(Object.keys(res.body).length).to.be.eql(4);
+            chai.expect(res.body).to.have.keys("id","name","description","tasks")
         });
         done();
     });
@@ -113,6 +115,7 @@ describe('Endpoint tests', () => {
             //check if boardId is either an integer or string ["0", 0]
             chai.expect(res.body).to.have.property("archived").eql(false);
             chai.expect(Object.keys(res.body).length).to.be.eql(5);
+            chai.expect(res.body).to.have.keys("taskName","boardId","archived","id","dateCreated")
         });
         done();
     });
@@ -130,6 +133,7 @@ describe('Endpoint tests', () => {
             chai.expect(res.body).to.have.property("description").eql("update description");
             chai.expect(res.body).to.have.property("tasks").to.be.empty;
             chai.expect(Object.keys(res.body).length).to.be.eql(4);
+            chai.expect(res.body).to.have.keys("id","name","description","tasks")
         });
         done();
     });    
