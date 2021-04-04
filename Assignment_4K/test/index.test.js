@@ -31,7 +31,6 @@ describe('Endpoint tests', () => {
     //Write your tests below here
     //###########################
 
-    // This test doesn't do much
     it("GET /boards ", (done) => {
         chai.request(apiUrl)
         .get("/boards")
@@ -53,7 +52,7 @@ describe('Endpoint tests', () => {
             chai.expect(res.body).to.have.property("tasks").to.be.a("array");
             chai.expect(res.body).to.have.property("tasks").that.does.include("0");
             chai.expect(Object.keys(res.body).length).to.be.eql(4)
-            chai.expect(res.body).to.have.keys("id","name","description","tasks")
+            chai.expect(res.body).to.have.keys("id","name","description","tasks");
             done();
         });
     }); 
@@ -90,7 +89,7 @@ describe('Endpoint tests', () => {
         .send({
             "name": "test",
             "description": "description test"
-        })
+        }).set('Content-type', 'application/json')
         .end((err, res) => {
             rightResponseJSONStatus(res, 201, false);
             chai.expect(res.body).to.have.property("name").eql("test");
@@ -107,12 +106,11 @@ describe('Endpoint tests', () => {
         .post("/boards/0/tasks")
         .send({
             "taskName": "test"
-        })
+        }).set('Content-type', 'application/json')
         .end((err, res) => {
             rightResponseJSONStatus(res, 201, false);
             chai.expect(res.body).to.have.property("taskName").eql("test");
             chai.expect(res.body).to.have.property("boardId").eql("0");
-            //check if boardId is either an integer or string ["0", 0]
             chai.expect(res.body).to.have.property("archived").eql(false);
             chai.expect(Object.keys(res.body).length).to.be.eql(5);
             chai.expect(res.body).to.have.keys("taskName","boardId","archived","id","dateCreated")
@@ -129,6 +127,7 @@ describe('Endpoint tests', () => {
         })
         .end((err, res) => {
             rightResponseJSONStatus(res, 200, false)
+            chai.expect(res.body).to.have.property("id").eql("1");
             chai.expect(res.body).to.have.property("name").eql("update name");
             chai.expect(res.body).to.have.property("description").eql("update description");
             chai.expect(res.body).to.have.property("tasks").to.be.empty;
@@ -156,6 +155,7 @@ describe('Endpoint tests', () => {
     it("DELETE /boards/:boardId", (done) => {
         chai.request(apiUrl)
         .post("/auth")
+        .set('Content-type', 'application/json')
         .auth("admin", "secret")
         .end((err, res) => {
             let token = res.body["token"][0]
@@ -172,5 +172,4 @@ describe('Endpoint tests', () => {
         });
         done();
     });
-
 });
