@@ -151,7 +151,6 @@ describe('Endpoint tests', () => {
         done();
     });
 
-    //POST request to get the bearer token and set it to the header in this put request
     it("DELETE /boards/:boardId", (done) => {
         chai.request(apiUrl)
         .post("/auth")
@@ -159,6 +158,8 @@ describe('Endpoint tests', () => {
         .auth("admin", "secret")
         .end((err, res) => {
             let token = res.body["token"][0]
+            chai.expect(Object.keys(res.body).length).to.be.eql(1);
+            chai.expect(res.body).to.have.property("token");
             chai.request(apiUrl)
             .delete("/boards/1")
             .set({"Authorization": `Bearer ${token}`})
