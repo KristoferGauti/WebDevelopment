@@ -41,7 +41,7 @@ describe('Endpoint tests', () => {
         First I will handle the endpoints that RETURN ARRAYS
         according to requirements
     */
-    it("GET /boards",function (done){
+    it("GET /api/v1/boards",function (done){
         chai.request(apiUrl).get('/boards').end( (err,res) => {
             // The status code shall be as expected
             chai.expect(res).to.have.status(200);
@@ -50,13 +50,12 @@ describe('Endpoint tests', () => {
             // The return type is an array
             chai.expect(res.body).to.be.a("array");
             // The array contains the right amount of elements
-            chai.expect(res.body.length).to.be.eql(2); 
-            
+            chai.expect(res.body.length).to.be.eql(2);           
             done();
         });
     })
 
-    it("GET /boards/:boardId/tasks",function (done) {
+    it("GET /api/v1/boards/:boardId/tasks",function (done) {
         chai.request(apiUrl).get("/boards/0/tasks").end((err, res) => {
             // The status code shall be as expected
             chai.expect(res).to.have.status(200);
@@ -66,7 +65,6 @@ describe('Endpoint tests', () => {
             chai.expect(res.body).to.be.a("array");
             // The array contains the right amount of elements
             chai.expect(res.body.length).to.be.eql(1);
-
             done();
         });
     });
@@ -75,7 +73,7 @@ describe('Endpoint tests', () => {
         Now I will handle the endpoints that RETURN INDIVIDUAL OBJECTS
         according to requirements
     */
-    it("GET /boards/:boardId", function (done){
+    it("GET /api/v1/boards/:boardId", function (done){
         chai.request(apiUrl).get("/boards/0").end((err, res) => {
             // The status code shall be as expected
             chai.expect(res).to.have.status(200);
@@ -96,10 +94,10 @@ describe('Endpoint tests', () => {
                 // Is the task of type array ?
                 chai.expect(res.body).to.have.property("tasks").to.be.a("array");
                 // Does the tasks array contain task 0 ?
-                chai.expect(res.body).to.have.property("tasks").that.does.include("0");
-            
+                chai.expect(res.body).to.have.property("tasks").that.does.include("0");      
         });
-
+        
+        // SECOND TEST
         chai.request(apiUrl).get("/boards/1").end((err, res) => {
             // The status code shall be as expected
             chai.expect(res).to.have.status(200);
@@ -120,14 +118,13 @@ describe('Endpoint tests', () => {
                 // Is the task of type array ?
                 chai.expect(res.body).to.have.property("tasks").to.be.a("array");
                 // Is the task array empty ?
-                chai.expect(res.body).to.have.property("tasks").that.eql([]);
-            
-            done();
+                chai.expect(res.body).to.have.property("tasks").that.eql([])
+                done();
         });
 
    });
 
-    it("GET /boards/:boardId/tasks/:taskId", function (done){
+    it("GET /api/v1/boards/:boardId/tasks/:taskId", function (done){
         chai.request(apiUrl).get("/boards/0/tasks/0").end((err, res) => {
             // The status code shall be as expected
             chai.expect(res).to.have.status(200);
@@ -149,8 +146,7 @@ describe('Endpoint tests', () => {
                 chai.expect(res.body).to.have.property("dateCreated").eql(1611244080000);
                 // Is the task not archived?
                 chai.expect(res.body).to.have.property("archived").eql(false);
-
-             done();
+                done();
 
         });
 
@@ -177,9 +173,8 @@ describe('Endpoint tests', () => {
                 chai.expect(res.body).to.have.property("name").eql("testBoard");
                 chai.expect(res.body).to.have.property("description").eql("posting board for testing purposes");
                 chai.expect(res.body).to.have.property("tasks").that.eql([]);
+                done();
         });
-
-        done();
     });
 
     it("PUT /api/v1/boards/:boardId", function (done){
@@ -202,9 +197,9 @@ describe('Endpoint tests', () => {
                 chai.expect(res.body).to.have.property("name").eql("nameTestPut");
                 chai.expect(res.body).to.have.property("description").eql("Testing put request");
                 chai.expect(res.body).to.have.property("tasks").to.be.empty;
+                done();
                 
         });
-        done();
     });
 
     it("POST /api/v1/boards/:boardId/tasks",function (done){
@@ -225,15 +220,16 @@ describe('Endpoint tests', () => {
                 chai.expect(res.body).to.have.property("taskName").eql("test");
                 chai.expect(res.body).to.have.property("boardId").eql("0");
                 chai.expect(res.body).to.have.property("archived").eql(false);
+                done();
         });
-        done();
     });
 
     it("POST /api/v1/auth",function (done){
         chai.request(apiUrl).post("/auth").auth("admin", "secret")
         .end((err, res) => {
             chai.expect(res).to.have.status(200);
-        done();
+            chai.expect(res).to.be.json;
+            done();
         });
     });
 
@@ -247,9 +243,19 @@ describe('Endpoint tests', () => {
             .delete("/boards/1").set({"Authorization": "Bearer " +String(token)})
             .end((err, res) => {
                 chai.expect(res).to.have.status(200);
+                // The response body is in json format
+                chai.expect(res).to.be.json;
+                // No additional objects
+                chai.expect(Object.keys(res.body).length).to.be.eql(1);
+                // All attributes have the expected values
+                chai.expect(res.body[0]).to.have.property("description").eql("Currently in progress.");
+                chai.expect(res.body[0]).to.have.property("id").eql("1");
+                chai.expect(res.body[0]).to.have.property("tasks").that.eql({});
+                chai.expect(res.body[0]).to.have.property("name").eql("Ongoing");
+                done();
             });
         });
-        done();
+
         
     });
     /*
@@ -257,7 +263,7 @@ describe('Endpoint tests', () => {
         not succeed when a property is missing
     */
     it("PUT /boards/:boardId", (done) => {
-        chai.request(apiUrl).put("/boards/1").send({"name": "testing for only name"})
+        chai.request(apiUrl).put("/boards/1").send({"name": "testing for name only"})
         .end((err, res) => {
             // The status code shall be 400
             chai.expect(res).to.have.status(400);
